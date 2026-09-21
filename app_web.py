@@ -1,5 +1,4 @@
 import os
-import time
 import datetime
 import streamlit as st
 import streamlit.components.v1 as components
@@ -40,7 +39,7 @@ with st.sidebar:
 if "popup_last_menu" not in st.session_state:
     st.session_state["popup_last_menu"] = None
     st.session_state["popup_dismissed"] = False
-    st.session_state["popup_closing"] = False
+st.session_state.setdefault("popup_closing", False)
 
 if st.session_state["popup_last_menu"] != menu:
     st.session_state["popup_last_menu"] = menu
@@ -73,55 +72,40 @@ PANDUAN = {
 }
 
 
+@st.dialog("CUSTOM TOOLS", width="large")
 def tampilkan_popup_panduan(menu_key: str):
-    """Tampilkan popup panduan di atas halaman jika belum di-dismiss."""
-    if st.session_state.get("popup_dismissed") and not st.session_state.get("popup_closing"):
-        return
-    if menu_key not in PANDUAN:
-        return
-
+    """Tampilkan panduan sebagai dialog modal saat modul dipilih."""
     panduan = PANDUAN[menu_key]
-    animasi = "custom-guide-fade-out" if st.session_state.get("popup_closing") else "custom-guide-fade-in"
     st.markdown(
-        f"""
+        """
         <style>
-        @keyframes customGuideFadeIn {{
-            from {{ opacity: 0; transform: translateY(-8px); }}
-            to {{ opacity: 1; transform: translateY(0); }}
-        }}
-        @keyframes customGuideFadeOut {{
-            from {{ opacity: 1; transform: translateY(0); }}
-            to {{ opacity: 0; transform: translateY(-8px); }}
-        }}
-        [data-testid="stVerticalBlockBorderWrapper"] {{
-            animation: {animasi} 350ms ease-out both;
-        }}
+        @keyframes customGuideFadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes customGuideFadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-8px); }
+        }
+        [role="dialog"] {
+            animation: customGuideFadeIn 350ms ease-out both;
+        }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    with st.container(border=True):
-        col_title, col_close = st.columns([9, 1])
-        with col_title:
-            st.markdown(f"#### {panduan['judul']}")
-        with col_close:
-            if st.button("✖", key="btn_close_popup", help="Tutup panduan ini"):
-                st.session_state["popup_closing"] = True
-                st.rerun()
-        st.markdown(panduan["isi"])
-    st.write("")
-
-    if st.session_state.get("popup_closing"):
-        time.sleep(0.35)
+    st.markdown(f"### {panduan['judul']}")
+    st.markdown(panduan["isi"])
+    if st.button("✖ Tutup panduan", key="btn_close_popup", use_container_width=True):
         st.session_state["popup_dismissed"] = True
-        st.session_state["popup_closing"] = False
         st.rerun()
 
 
 # --- 4. KONTEN UTAMA: PENGGABUNG PDF (BY NIK) ---
 if menu == "📄 Penggabung PDF (by NIK)":
-    tampilkan_popup_panduan("📄 Penggabung PDF (by NIK)")
+    if not st.session_state.get("popup_dismissed"):
+        tampilkan_popup_panduan("📄 Penggabung PDF (by NIK)")
     st.title("📄 Penggabung PDF Otomatis (by NIK)")
     st.markdown(
         "Mengelompokkan file PDF berdasarkan **NIK / ID Karyawan** dan mengurutkan halaman "
@@ -245,7 +229,8 @@ if menu == "📄 Penggabung PDF (by NIK)":
 
 # --- 5. KONTEN UTAMA: PENGGABUNG PDF (BY ALL) DENGAN DRAG & DROP ---
 elif menu == "📑 Penggabung PDF (by All)":
-    tampilkan_popup_panduan("📑 Penggabung PDF (by All)")
+    if not st.session_state.get("popup_dismissed"):
+        tampilkan_popup_panduan("📑 Penggabung PDF (by All)")
     st.title("📑 Penggabung PDF (by All)")
     st.markdown(
         "Menggabungkan seluruh file PDF yang dipilih menjadi **1 file dokumen utuh**. "
