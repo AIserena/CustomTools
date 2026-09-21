@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from pdf_all_logic import gabung_pdf_all_files, buka_folder
+from mvc.models import PdfAllMergeModel
 
 class PageMergeAllPDF(tk.Frame):
     def __init__(self, parent, controller):
@@ -245,7 +245,7 @@ class PageMergeAllPDF(tk.Frame):
         output_path = os.path.join(folder_tujuan, nama_output)
 
         try:
-            gabung_pdf_all_files(self.files_list, output_path)
+            PdfAllMergeModel.merge_files(self.files_list, output_path)
             self.btn_buka_folder.pack(side="left")
             jawab = messagebox.askyesno(
                 "Berhasil",
@@ -259,7 +259,7 @@ class PageMergeAllPDF(tk.Frame):
     def buka_folder_hasil(self):
         folder = self.entry_tujuan.get().strip()
         try:
-            buka_folder(folder)
+            PdfAllMergeModel.open_folder(folder)
         except Exception as e:
             messagebox.showerror("Error", f"Gagal membuka folder: {e}")
 

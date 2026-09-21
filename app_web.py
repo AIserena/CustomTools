@@ -2,8 +2,8 @@ import os
 import datetime
 import streamlit as st
 import streamlit.components.v1 as components
-from pdf_logic import proses_merge_pdf_memory, buat_zip_bytes
-from pdf_all_logic import gabung_pdf_all_memory
+from mvc.controllers import WebController
+from mvc.views.web_guide import show_guide
 
 # --- 1. KOMPONEN CUSTOM DRAG & DROP ---
 _component_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "drag_drop_component")
@@ -39,73 +39,14 @@ with st.sidebar:
 if "popup_last_menu" not in st.session_state:
     st.session_state["popup_last_menu"] = None
     st.session_state["popup_dismissed"] = False
-st.session_state.setdefault("popup_closing", False)
-
 if st.session_state["popup_last_menu"] != menu:
     st.session_state["popup_last_menu"] = menu
     st.session_state["popup_dismissed"] = False
-    st.session_state["popup_closing"] = False
-
-PANDUAN = {
-    "📄 Penggabung PDF (by NIK)": {
-        "judul": "💡 Panduan: Penggabung PDF (by NIK)",
-        "isi": """
-**Cara Penggunaan:**
-1. 📤 **Upload** semua file PDF — sistem otomatis mengelompokkan berdasarkan **NIK / ID Karyawan**.
-2. ✏️ Isi **Urutan Kata Kunci** (dipisahkan koma) untuk menentukan urutan halaman. Misal: `1, 2` atau `Maret, April`.
-3. ✏️ Isi **Nama File Lanjutan** untuk penamaan file hasil. NIK otomatis di depan. Misal: `_SLIP_GAJI` → hasil: `12345_SLIP_GAJI.pdf`.
-4. 🚀 Klik **GABUNGKAN PDF** — proses otomatis berjalan.
-5. 📦 Klik **DOWNLOAD SEMUA (.ZIP)** untuk mengunduh semua hasil sekaligus.
-"""
-    },
-    "📑 Penggabung PDF (by All)": {
-        "judul": "💡 Panduan: Penggabung PDF (by All)",
-        "isi": """
-**Cara Penggunaan:**
-1. 📤 **Upload** file-file PDF yang ingin digabungkan menjadi **1 file tunggal**.
-2. ✋ **Klik & Seret (DRAG)** kartu file ke atas atau ke bawah untuk menentukan urutan halaman. File paling atas = halaman 1.
-3. ✏️ Isi **Nama File PDF Hasil Gabungan**.
-4. 🚀 Klik **GABUNGKAN SEMUA PDF** — semua file digabung sesuai urutan drag.
-5. ⬇️ Klik tombol **DOWNLOAD** untuk mengunduh file hasil.
-"""
-    },
-}
-
-
-@st.dialog("CUSTOM TOOLS", width="large")
-def tampilkan_popup_panduan(menu_key: str):
-    """Tampilkan panduan sebagai dialog modal saat modul dipilih."""
-    panduan = PANDUAN[menu_key]
-    st.markdown(
-        """
-        <style>
-        @keyframes customGuideFadeIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes customGuideFadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-8px); }
-        }
-        [role="dialog"] {
-            animation: customGuideFadeIn 350ms ease-out both;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown(f"### {panduan['judul']}")
-    st.markdown(panduan["isi"])
-    if st.button("✖ Tutup panduan", key="btn_close_popup", use_container_width=True):
-        st.session_state["popup_dismissed"] = True
-        st.rerun()
-
 
 # --- 4. KONTEN UTAMA: PENGGABUNG PDF (BY NIK) ---
 if menu == "📄 Penggabung PDF (by NIK)":
     if not st.session_state.get("popup_dismissed"):
-        tampilkan_popup_panduan("📄 Penggabung PDF (by NIK)")
+        show_guide("📄 Penggabung PDF (by NIK)")
     st.title("📄 Penggabung PDF Otomatis (by NIK)")
     st.markdown(
         "Mengelompokkan file PDF berdasarkan **NIK / ID Karyawan** dan mengurutkan halaman "
@@ -160,9 +101,8 @@ if menu == "📄 Penggabung PDF (by NIK)":
             st.error("⚠️ Harap upload setidaknya 2 file PDF terlebih dahulu!")
         else:
             with st.spinner("Sedang memproses dan menggabungkan file PDF..."):
-                files_dict = {f.name: f.getvalue() for f in uploaded_files}
-                hasil_dict, laporan, unpaired = proses_merge_pdf_memory(
-                    files_dict, kata_kunci, penamaan_lanjutan
+                hasil_dict, laporan, unpaired = WebController.merge_by_id(
+                    uploaded_files, kata_kunci, penamaan_lanjutan
                 )
 
                 st.session_state["hasil_merge"] = hasil_dict
@@ -178,7 +118,7 @@ if menu == "📄 Penggabung PDF (by NIK)":
         if hasil_dict:
             st.success(f"🎉 **Selesai!** Berhasil menggabungkan **{len(hasil_dict)} pasang** file PDF.")
 
-            zip_bytes = buat_zip_bytes(hasil_dict)
+            zip_bytes = WebController.create_zip(hasil_dict)
             waktu_sekarang = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             nama_zip = f"HASIL_MERGE_PDF_{waktu_sekarang}.zip"
 
@@ -230,7 +170,7 @@ if menu == "📄 Penggabung PDF (by NIK)":
 # --- 5. KONTEN UTAMA: PENGGABUNG PDF (BY ALL) DENGAN DRAG & DROP ---
 elif menu == "📑 Penggabung PDF (by All)":
     if not st.session_state.get("popup_dismissed"):
-        tampilkan_popup_panduan("📑 Penggabung PDF (by All)")
+        show_guide("📑 Penggabung PDF (by All)")
     st.title("📑 Penggabung PDF (by All)")
     st.markdown(
         "Menggabungkan seluruh file PDF yang dipilih menjadi **1 file dokumen utuh**. "
@@ -316,11 +256,8 @@ elif menu == "📑 Penggabung PDF (by All)":
             else:
                 with st.spinner("Sedang menggabungkan semua file PDF sesuai urutan..."):
                     try:
-                        ordered_tuples = [
-                            (uploaded_all[idx].name, uploaded_all[idx].getvalue())
-                            for idx in active_indices
-                        ]
-                        merged_bytes = gabung_pdf_all_memory(ordered_tuples)
+                        ordered_files = [uploaded_all[idx] for idx in active_indices]
+                        merged_bytes = WebController.merge_all(ordered_files)
                         st.session_state["hasil_merge_all"] = merged_bytes
                     except Exception as e:
                         st.error(f"Gagal menggabungkan PDF: {e}")

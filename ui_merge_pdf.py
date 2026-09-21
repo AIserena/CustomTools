@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from pdf_logic import hitung_pdf, proses_merge_pdf, buka_folder, buat_nama_file
+from mvc.models import PdfMergeModel
 
 class PageMergePDF(tk.Frame):
     def __init__(self, parent, controller):
@@ -12,13 +12,11 @@ class PageMergePDF(tk.Frame):
     def setup_ui(self):
         # Header + Tombol Kembali
         header_frame = tk.Frame(self)
-        header_frame.pack(fill="x", padx=10, pady=10)
         header_frame.pack(fill="x", padx=15, pady=12)
 
         btn_back = ttk.Button(header_frame, text="< Kembali", command=lambda: self.controller.show_frame("DashboardMenu"))
         btn_back.pack(side="left")
 
-        lbl_title = tk.Label(header_frame, text="Penggabung PDF", font=("Segoe UI", 11, "bold"))
         lbl_title = tk.Label(header_frame, text="Penggabung PDF", font=("Segoe UI", 12, "bold"))
         lbl_title.pack(side="left", padx=15)
 
@@ -27,8 +25,6 @@ class PageMergePDF(tk.Frame):
         container.pack(fill="x", anchor="n")
 
         # Form Frame
-        frame = tk.Frame(self, padx=15, pady=5)
-        frame.pack(fill="both", expand=True)
         form_frame = tk.Frame(container)
         form_frame.pack(fill="x", expand=True)
 
@@ -38,12 +34,6 @@ class PageMergePDF(tk.Frame):
         form_frame.columnconfigure(2, weight=0)
 
         # 1. Folder Asal
-        lbl_sumber = tk.Label(frame, text="Folder PDF Asal:", font=("Segoe UI", 9))
-        lbl_sumber.grid(row=0, column=0, sticky="w", pady=5)
-        self.entry_sumber = ttk.Entry(frame, width=38)
-        self.entry_sumber.grid(row=0, column=1, padx=5, pady=5)
-        btn_sumber = ttk.Button(frame, text="Cari...", command=self.pilih_folder_sumber)
-        btn_sumber.grid(row=0, column=2, pady=5)
         lbl_sumber = tk.Label(form_frame, text="Folder PDF Asal:", font=("Segoe UI", 9))
         lbl_sumber.grid(row=0, column=0, sticky="w", pady=6, padx=(0, 10))
         self.entry_sumber = ttk.Entry(form_frame)
@@ -51,18 +41,10 @@ class PageMergePDF(tk.Frame):
         btn_sumber = ttk.Button(form_frame, text="Cari...", command=self.pilih_folder_sumber)
         btn_sumber.grid(row=0, column=2, padx=(8, 0), pady=6)
 
-        self.lbl_count = tk.Label(frame, text="", font=("Segoe UI", 8, "bold"))
-        self.lbl_count.grid(row=1, column=1, sticky="w")
         self.lbl_count = tk.Label(form_frame, text="", font=("Segoe UI", 8, "bold"))
         self.lbl_count.grid(row=1, column=1, sticky="w", pady=(0, 4))
 
         # 2. Folder Tujuan
-        lbl_tujuan = tk.Label(frame, text="Folder Hasil:", font=("Segoe UI", 9))
-        lbl_tujuan.grid(row=2, column=0, sticky="w", pady=5)
-        self.entry_tujuan = ttk.Entry(frame, width=38)
-        self.entry_tujuan.grid(row=2, column=1, padx=5, pady=5)
-        btn_tujuan = ttk.Button(frame, text="Cari...", command=self.pilih_folder_tujuan)
-        btn_tujuan.grid(row=2, column=2, pady=5)
         lbl_tujuan = tk.Label(form_frame, text="Folder Hasil:", font=("Segoe UI", 9))
         lbl_tujuan.grid(row=2, column=0, sticky="w", pady=6, padx=(0, 10))
         self.entry_tujuan = ttk.Entry(form_frame)
@@ -71,9 +53,6 @@ class PageMergePDF(tk.Frame):
         btn_tujuan.grid(row=2, column=2, padx=(8, 0), pady=6)
 
         # 3. Urutan Kata Kunci
-        lbl_keyword = tk.Label(frame, text="Urutan Kata Kunci:", font=("Segoe UI", 9))
-        lbl_keyword.grid(row=3, column=0, sticky="w", pady=5)
-        self.entry_keyword = ttk.Entry(frame, width=38)
         lbl_keyword = tk.Label(form_frame, text="Urutan Kata Kunci:", font=("Segoe UI", 9))
         lbl_keyword.grid(row=3, column=0, sticky="w", pady=6, padx=(0, 10))
         self.entry_keyword = ttk.Entry(form_frame)
@@ -81,15 +60,10 @@ class PageMergePDF(tk.Frame):
         self.entry_keyword.grid(row=3, column=1, padx=5, pady=5)
         self.entry_keyword.grid(row=3, column=1, sticky="ew", pady=6)
 
-        lbl_info = tk.Label(frame, text="*Contoh: 1, 1 atau Maret, April", font=("Segoe UI", 8, "italic"), fg="gray")
-        lbl_info.grid(row=4, column=1, sticky="w")
         lbl_info = tk.Label(form_frame, text="*Contoh: 1, 2, atau Maret, April", font=("Segoe UI", 8, "italic"), fg="gray")
         lbl_info.grid(row=4, column=1, sticky="w", pady=(0, 4))
 
         # 4. Penamaan Lanjutan File Hasil
-        lbl_nama = tk.Label(frame, text="Nama File Lanjutan:", font=("Segoe UI", 9))
-        lbl_nama.grid(row=5, column=0, sticky="w", pady=5)
-        self.entry_nama_file = ttk.Entry(frame, width=38)
         lbl_nama = tk.Label(form_frame, text="Nama File Lanjutan:", font=("Segoe UI", 9))
         lbl_nama.grid(row=5, column=0, sticky="w", pady=6, padx=(0, 10))
         self.entry_nama_file = ttk.Entry(form_frame)
@@ -132,7 +106,7 @@ class PageMergePDF(tk.Frame):
             self.btn_buka_folder.pack_forget()
             self.entry_sumber.delete(0, tk.END)
             self.entry_sumber.insert(0, folder)
-            pdf_count = hitung_pdf(folder)
+            pdf_count = PdfMergeModel.count_pdfs(folder)
             self.lbl_count.config(text=f"Terdeteksi: {pdf_count} file PDF", fg="#28a745" if pdf_count > 0 else "red")
 
             if not self.entry_tujuan.get():
@@ -148,7 +122,7 @@ class PageMergePDF(tk.Frame):
 
     def jalankan_proses(self):
         try:
-            total = proses_merge_pdf(
+            total = PdfMergeModel.merge_folder(
                 self.entry_sumber.get(), 
                 self.entry_tujuan.get(), 
                 self.entry_keyword.get(),
@@ -172,6 +146,6 @@ class PageMergePDF(tk.Frame):
     def buka_folder_hasil(self):
         folder = self.entry_tujuan.get()
         try:
-            buka_folder(folder)
+            PdfMergeModel.open_folder(folder)
         except Exception as e:
             messagebox.showerror("Error", f"Gagal membuka folder: {e}")
