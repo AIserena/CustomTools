@@ -1,4 +1,5 @@
 import os
+import time
 import datetime
 import streamlit as st
 import streamlit.components.v1 as components
@@ -39,10 +40,12 @@ with st.sidebar:
 if "popup_last_menu" not in st.session_state:
     st.session_state["popup_last_menu"] = None
     st.session_state["popup_dismissed"] = False
+    st.session_state["popup_closing"] = False
 
 if st.session_state["popup_last_menu"] != menu:
     st.session_state["popup_last_menu"] = menu
     st.session_state["popup_dismissed"] = False
+    st.session_state["popup_closing"] = False
 
 PANDUAN = {
     "📄 Penggabung PDF (by NIK)": {
@@ -72,22 +75,48 @@ PANDUAN = {
 
 def tampilkan_popup_panduan(menu_key: str):
     """Tampilkan popup panduan di atas halaman jika belum di-dismiss."""
-    if st.session_state.get("popup_dismissed"):
+    if st.session_state.get("popup_dismissed") and not st.session_state.get("popup_closing"):
         return
     if menu_key not in PANDUAN:
         return
 
     panduan = PANDUAN[menu_key]
+    animasi = "custom-guide-fade-out" if st.session_state.get("popup_closing") else "custom-guide-fade-in"
+    st.markdown(
+        f"""
+        <style>
+        @keyframes customGuideFadeIn {{
+            from {{ opacity: 0; transform: translateY(-8px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+        @keyframes customGuideFadeOut {{
+            from {{ opacity: 1; transform: translateY(0); }}
+            to {{ opacity: 0; transform: translateY(-8px); }}
+        }}
+        [data-testid="stVerticalBlockBorderWrapper"] {{
+            animation: {animasi} 350ms ease-out both;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     with st.container(border=True):
         col_title, col_close = st.columns([9, 1])
         with col_title:
             st.markdown(f"#### {panduan['judul']}")
         with col_close:
             if st.button("✖", key="btn_close_popup", help="Tutup panduan ini"):
-                st.session_state["popup_dismissed"] = True
+                st.session_state["popup_closing"] = True
                 st.rerun()
         st.markdown(panduan["isi"])
     st.write("")
+
+    if st.session_state.get("popup_closing"):
+        time.sleep(0.35)
+        st.session_state["popup_dismissed"] = True
+        st.session_state["popup_closing"] = False
+        st.rerun()
 
 
 # --- 4. KONTEN UTAMA: PENGGABUNG PDF (BY NIK) ---
