@@ -98,13 +98,11 @@ class PageMergePDF(tk.Frame):
         self.entry_nama_file.grid(row=5, column=1, sticky="ew", pady=6)
 
         lbl_nama_info = tk.Label(
-            frame, 
-            form_frame, 
-            text="*NIK otomatis di depan. Contoh: _SLIP_GAJI atau - PKWT (Hasil: [NIK]_SLIP_GAJI.pdf)", 
-            font=("Segoe UI", 8, "italic"), 
+            form_frame,
+            text="*NIK otomatis di depan. Contoh: _SLIP_GAJI atau - PKWT (Hasil: [NIK]_SLIP_GAJI.pdf)",
+            font=("Segoe UI", 8, "italic"),
             fg="gray"
         )
-        lbl_nama_info.grid(row=6, column=1, sticky="w")
         lbl_nama_info.grid(row=6, column=1, sticky="w", pady=(0, 8))
 
         # Tombol Aksi (Tepat di bawah field nama lanjutan)
@@ -112,25 +110,18 @@ class PageMergePDF(tk.Frame):
         btn_action_frame.grid(row=7, column=1, sticky="w", pady=(10, 15))
 
         # Tombol Proses
-        btn_proses = tk.Button(
-            self, text="GABUNGKAN PDF", bg="#28a745", fg="white", 
-            font=("Segoe UI", 10, "bold"), relief="flat", padx=10, pady=6, 
         self.btn_proses = tk.Button(
             btn_action_frame, text="GABUNGKAN PDF", bg="#28a745", fg="white", 
             font=("Segoe UI", 10, "bold"), relief="flat", padx=16, pady=7, 
             cursor="hand2",
             command=self.jalankan_proses
         )
-        btn_proses.pack(pady=10)
         self.btn_proses.pack(side="left", padx=(0, 10))
 
-        # Tombol Buka Folder Hasil (Muncul setelah proses merge selesai)
-        # Tombol Buka Folder Hasil (Awalnya tersembunyi, muncul setelah merge selesai)
+        # Tombol Buka Folder Hasil (Awalnya tersembunyi)
         self.btn_buka_folder = tk.Button(
-            self, text="📂 BUKA FOLDER HASIL", bg="#007bff", fg="white", 
-            font=("Segoe UI", 10, "bold"), relief="flat", padx=12, pady=6, 
-            btn_action_frame, text="📂 BUKA FOLDER HASIL", bg="#007bff", fg="white", 
-            font=("Segoe UI", 10, "bold"), relief="flat", padx=16, pady=7, 
+            btn_action_frame, text="📂 BUKA FOLDER HASIL", bg="#007bff", fg="white",
+            font=("Segoe UI", 10, "bold"), relief="flat", padx=16, pady=7,
             cursor="hand2",
             command=self.buka_folder_hasil
         )

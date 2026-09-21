@@ -17,24 +17,8 @@ class DashboardMenu(tk.Frame):
         super().__init__(parent)
         self.controller = controller
 
-        # --- TAMPILKAN LOGO DI DASHBOARD ---
-        logo_png_path = resource_path("sgi_logo.png")
-        if os.path.exists(logo_png_path):
-            # 1. Load gambar asli
-            gambar_ori = tk.PhotoImage(file=logo_png_path)
-            
-            # 2. ATUR UKURAN DI SINI (Ubah angka 3 sesuai kebutuhan)
-            # subsample(2, 2) = diperkecil 2x (setengahnya)
-            # subsample(3, 3) = diperkecil 3x
-            # subsample(4, 4) = diperkecil 4x
-            self.img_logo = gambar_ori.subsample(5, 5) 
-            
-            # 3. Tampilkan gambar
-            lbl_logo_img = tk.Label(self, image=self.img_logo)
-            lbl_logo_img.pack(pady=(30, 0))
-
         # Judul Dashboard
-        lbl_title = tk.Label(self, text="", font=("Segoe UI", 16, "bold"))
+        lbl_title = tk.Label(self, text="CUSTOM", font=("Segoe UI", 16, "bold"))
         lbl_title.pack(pady=(10, 5))
 
         lbl_subtitle = tk.Label(self, text="Pilih tools yang ingin anda gunakan:", font=("Segoe UI", 10), fg="gray")
@@ -74,19 +58,11 @@ class DashboardMenu(tk.Frame):
 class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Tools SGI - Multi Utility Desktop")
+        self.title("CUSTOM - Multi Utility Desktop")
 
         self.state('zoomed')
         self.resizable(True, True)
         self.minsize(650, 480)
-
-        # Icon Title Bar (TETAP PAKAI .ICO)
-        logo_ico_path = resource_path("sgi_logo.ico")
-        if os.path.exists(logo_ico_path):
-            try:
-                self.iconbitmap(logo_ico_path)
-            except Exception:
-                pass
 
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)

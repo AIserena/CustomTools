@@ -11,19 +11,17 @@ drag_drop_sortable = components.declare_component("drag_drop_sortable", path=_co
 
 # --- 2. KONFIGURASI HALAMAN ---
 st.set_page_config(
-    page_title="SGI TOOLS",
-    page_icon="sgi_logo.ico" if os.path.exists("sgi_logo.ico") else "📄",
+    page_title="CUSTOM TOOLS",
+    page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # --- 3. SIDEBAR BRANDING & NAVIGASI ---
 with st.sidebar:
-    if os.path.exists("sgi_logo.png"):
-        st.image("sgi_logo.png", use_container_width=True)
-    
+    st.title("CUSTOM")
     st.markdown("")
-    st.caption("CUSTOM TOOLS SGI")
+    st.caption("CUSTOM TOOLS")
     st.divider()
 
     st.markdown("#### **MENU:**")
