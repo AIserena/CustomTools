@@ -26,13 +26,31 @@ GUIDES = {
 5. ⬇️ Klik tombol **DOWNLOAD** untuk mengunduh file hasil.
 """,
     },
+    "📝 Konversi PDF ke Word": {
+        "title": "💡 Panduan: Konversi PDF ke Word (.docx)",
+        "body": """
+**Keunggulan Konversi Rapi:**
+- 📐 **Format Asli Terjaga**: Paragraf, judul, jenis font, spasi baris, dan margin direkonstruksi dengan alami.
+- 📊 **Tabel Presisi**: Garis batas (lattice/border) maupun tabel selaras (stream) dikonversi menjadi tabel Word asli yang mudah diedit.
+- 🔤 **Tanpa Textbox Berantakan**: Teks mengalir sebagai paragraf Word alami, bukan kotak-kotak terpisah.
+- 📦 **Mendukung Konversi Massal**: Konversi satu atau banyak file sekaligus, unduh per file atau file .ZIP.
+
+**Cara Penggunaan:**
+1. 📤 **Upload** 1 atau beberapa file PDF.
+2. ⚙️ Tentukan **Pengaturan Halaman** (Semua Halaman atau ketik nomor halaman, misal: `1-5`).
+3. 🚀 Klik **KONVERSI KE WORD (.DOCX)**.
+4. ⬇️ Unduh file Word per dokumen atau unduh **SEMUA HASIL (.ZIP)**.
+""",
+    },
 }
 
 
 @st.dialog("CUSTOM TOOLS", width="large")
 def show_guide(menu_key: str):
     """Render the selected module guide as a modal view."""
-    guide = GUIDES[menu_key]
+    guide = GUIDES.get(menu_key)
+    if not guide:
+        return
     st.markdown(
         """
         <style>

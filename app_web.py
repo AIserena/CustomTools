@@ -30,6 +30,7 @@ with st.sidebar:
         options=[
             "📄 Penggabung PDF (by NIK)",
             "📑 Penggabung PDF (by All)",
+            "📝 Konversi PDF ke Word",
             "🔒 Tool Lain (Segera Hadir)"
         ],
         label_visibility="collapsed"
@@ -53,7 +54,6 @@ if menu == "📄 Penggabung PDF (by NIK)":
         "berdasarkan **kata kunci** yang ditentukan."
     )
     st.divider()
-
 
     st.subheader("1. Upload File PDF")
     uploaded_files = st.file_uploader(
@@ -280,7 +280,124 @@ elif menu == "📑 Penggabung PDF (by All)":
         st.session_state["hasil_merge_all"] = None
 
 
-# --- 6. KONTEN UTAMA: TOOL LAIN ---
+# --- 6. KONTEN UTAMA: KONVERSI PDF KE WORD (.DOCX RAPIH) ---
+elif menu == "📝 Konversi PDF ke Word":
+    if not st.session_state.get("popup_dismissed"):
+        show_guide("📝 Konversi PDF ke Word")
+
+    st.title("📝 Konversi PDF ke Word (.docx)")
+    st.markdown(
+        "Mengonversi file dokumen PDF menjadi dokumen **Microsoft Word (.docx)** dengan **tata letak rapi, "
+        "format font terjaga, dan tabel yang dapat diedit langsung** (bukan sekadar textbox berantakan)."
+    )
+    st.divider()
+
+    st.subheader("1. Upload File PDF")
+    uploaded_pdf_list = st.file_uploader(
+        "Pilih atau seret (drag & drop) file-file PDF ke area di bawah ini:",
+        type=["pdf"],
+        accept_multiple_files=True,
+        help="Mendukung konversi satu file maupun banyak file sekaligus",
+        key="uploader_pdf_to_word"
+    )
+
+    if uploaded_pdf_list:
+        st.info(f"📁 Terdeteksi **{len(uploaded_pdf_list)}** file PDF siap dikonversi.")
+
+    st.subheader("2. Pengaturan Kerapihan Dokumen")
+    col_w1, col_w2 = st.columns(2)
+
+    with col_w1:
+        rentang_halaman = st.text_input(
+            "Rentang Halaman (Opsional):",
+            value="",
+            placeholder="Contoh: 1-3, 5 atau kosongkan untuk Semua",
+            help="Kosongkan jika ingin mengonversi seluruh halaman dokumen PDF.",
+            key="pages_pdf_to_word"
+        )
+        st.caption("*Kosongkan untuk **Semua Halaman**, atau ketik misal: `1-5` atau `1, 3, 5-7`")
+
+    with col_w2:
+        st.write("**Opsi Rekonstruksi Layout:**")
+        opt_hyphen = st.checkbox(
+            "Rapihkan spasi & tanda hubung akhir baris (hyphenation)",
+            value=True,
+            help="Menghilangkan pemenggalan kata otomatis pada akhir baris agar teks menyatu alami.",
+            key="chk_hyphen"
+        )
+        st.caption("✨ *Tabel garis batas, tabel teks selaras, dan daftar poin (bullet list) otomatis direkonstruksi menjadi format Word asli.*")
+
+    st.write("")
+    btn_convert_word = st.button(
+        "🚀 KONVERSI KE WORD (.DOCX)",
+        type="primary",
+        use_container_width=True,
+        key="btn_convert_pdf_to_word"
+    )
+
+    if "hasil_pdf_to_word" not in st.session_state:
+        st.session_state["hasil_pdf_to_word"] = None
+        st.session_state["laporan_pdf_to_word"] = None
+
+    if btn_convert_word:
+        if not uploaded_pdf_list:
+            st.error("⚠️ Harap upload setidaknya 1 file PDF terlebih dahulu!")
+        else:
+            with st.spinner("Sedang memproses dan merekonstruksi dokumen PDF ke format Word (.docx)..."):
+                try:
+                    hasil_dict, laporan = WebController.convert_batch_pdf_to_word(
+                        files=uploaded_pdf_list,
+                        pages_spec=rentang_halaman,
+                        delete_hyphen=opt_hyphen
+                    )
+                    st.session_state["hasil_pdf_to_word"] = hasil_dict
+                    st.session_state["laporan_pdf_to_word"] = laporan
+                except Exception as exc:
+                    st.error(f"Gagal melakukan konversi: {exc}")
+
+    if st.session_state.get("hasil_pdf_to_word") is not None:
+        hasil_word = st.session_state["hasil_pdf_to_word"]
+        laporan_word = st.session_state["laporan_pdf_to_word"]
+
+        st.divider()
+        if hasil_word:
+            sukses_count = sum(1 for item in laporan_word if item.get("status") == "success")
+            st.success(f"🎉 **Selesai!** Berhasil mengonversi **{sukses_count} file** menjadi dokumen Word (.docx) yang rapi.")
+
+            # Jika lebih dari 1 file, sediakan download ZIP
+            if len(hasil_word) > 1:
+                zip_bytes = WebController.create_zip(hasil_word)
+                waktu_sekarang = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                nama_zip = f"HASIL_CONVERT_WORD_{waktu_sekarang}.zip"
+
+                st.download_button(
+                    label=f"📦 DOWNLOAD SEMUA HASIL ({len(hasil_word)} DOKUMEN WORD - .ZIP)",
+                    data=zip_bytes,
+                    file_name=nama_zip,
+                    mime="application/zip",
+                    type="primary",
+                    use_container_width=True
+                )
+                st.write("")
+
+            st.subheader("📋 Daftar Dokumen Hasil Konversi")
+            for item in laporan_word:
+                if item.get("status") == "success":
+                    out_name = item["output"]
+                    with st.expander(f"📄 **{out_name}** — {item['size_kb']} KB (Sumber: `{item['source']}`)", expanded=True):
+                        st.write(f"✅ Format teks, tata letak, dan tabel berhasil direkonstruksi.")
+                        st.download_button(
+                            label=f"⬇️ Download {out_name}",
+                            data=hasil_word[out_name],
+                            file_name=out_name,
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            key=f"dl_word_{out_name}"
+                        )
+                else:
+                    st.error(f"❌ Gagal mengonversi `{item['source']}`: {item.get('error')}")
+
+
+# --- 7. KONTEN UTAMA: TOOL LAIN ---
 elif menu == "🔒 Tool Lain (Segera Hadir)":
     st.title("🔒 Tool Lain")
     st.info("Fitur utilitas tambahan sedang dalam tahap pengembangan dan akan segera hadir.")

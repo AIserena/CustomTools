@@ -29,16 +29,26 @@ class DashboardView(tk.Frame):
             "PageMergePDF",
             "#007bff",
             0,
+            0,
         )
         self._create_module_button(
             grid_frame,
             "📑  PENGGABUNG PDF\n(BY ALL)",
             "PageMergeAllPDF",
             "#28a745",
+            0,
             1,
         )
+        self._create_module_button(
+            grid_frame,
+            "📝  KONVERSI PDF\nKE WORD (.DOCX)",
+            "PagePdfToWord",
+            "#6f42c1",
+            0,
+            2,
+        )
 
-    def _create_module_button(self, parent, label, frame_name, color, column):
+    def _create_module_button(self, parent, label, frame_name, color, row, column):
         button = tk.Button(
             parent,
             text=label,
@@ -51,4 +61,4 @@ class DashboardView(tk.Frame):
             cursor="hand2",
             command=lambda: self.controller.show_frame(frame_name),
         )
-        button.grid(row=0, column=column, padx=15, pady=10)
+        button.grid(row=row, column=column, padx=12, pady=10)

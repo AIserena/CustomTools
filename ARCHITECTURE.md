@@ -7,23 +7,26 @@ The project follows a small MVC structure shared by the desktop and web entry po
 ```text
 mvc/
   models/
-    pdf_operations.py       # Core ID-based PDF operations
-    pdf_all_operations.py   # Core ordered PDF operations
-    pdf_model.py            # ID-based model facade
-    pdf_all_model.py        # Ordered PDF model facade
+    pdf_operations.py         # Core ID-based PDF operations
+    pdf_all_operations.py     # Core ordered PDF operations
+    pdf_to_word_operations.py # Core PDF to Word (.docx) conversion operations
+    pdf_model.py              # ID-based model facade
+    pdf_all_model.py          # Ordered PDF model facade
+    pdf_to_word_model.py      # PDF to Word conversion facade
   controllers/
-    desktop_controller.py   # Tkinter navigation and view lifecycle
-    web_controller.py       # Streamlit input-to-model coordination
+    desktop_controller.py     # Tkinter navigation and view lifecycle
+    web_controller.py         # Streamlit input-to-model coordination
   views/
-    dashboard_view.py       # Tkinter dashboard
-    web_guide.py            # Streamlit guide dialog
+    dashboard_view.py         # Tkinter dashboard
+    web_guide.py              # Streamlit guide dialog
 ```
 
 ## Entry Points
 
 - `main_app.py` starts the desktop application.
 - `app_web.py` starts the Streamlit application.
-- `ui_merge_pdf.py` and `ui_merge_all.py` are desktop views kept as stable import points.
+- `api.py` exposes FastAPI endpoints for PDF merging and Word conversion.
+- `ui_merge_pdf.py`, `ui_merge_all.py`, and `ui_pdf_to_word.py` are desktop views kept as stable import points.
 - `pdf_logic.py` and `pdf_all_logic.py` are compatibility adapters for older imports.
 
 ## Responsibilities
