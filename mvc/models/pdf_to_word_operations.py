@@ -198,3 +198,4 @@ def open_folder(folder_path: str):
         subprocess.Popen(["open", folder_path])
     else:
         subprocess.Popen(["xdg-open", folder_path])
+
