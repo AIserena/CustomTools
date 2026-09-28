@@ -70,3 +70,4 @@ def show_guide(menu_key: str):
     if st.button("✖ Tutup panduan", key="btn_close_popup", use_container_width=True):
         st.session_state["popup_dismissed"] = True
         st.rerun()
+

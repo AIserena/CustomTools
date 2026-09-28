@@ -36,3 +36,4 @@ class WebController:
             pages_spec=pages_spec,
             delete_hyphen=delete_hyphen,
         )
+

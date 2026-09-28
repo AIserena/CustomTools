@@ -31,7 +31,7 @@ with st.sidebar:
             "📄 Penggabung PDF (by NIK)",
             "📑 Penggabung PDF (by All)",
             "📝 Konversi PDF ke Word",
-            "🔒 Tool Lain (Segera Hadir)"
+            " Tool Lain (Segera Hadir)"
         ],
         label_visibility="collapsed"
     )
@@ -401,3 +401,4 @@ elif menu == "📝 Konversi PDF ke Word":
 elif menu == "🔒 Tool Lain (Segera Hadir)":
     st.title("🔒 Tool Lain")
     st.info("Fitur utilitas tambahan sedang dalam tahap pengembangan dan akan segera hadir.")
+

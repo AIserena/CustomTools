@@ -61,9 +61,8 @@ class PdfToWordModel:
         return open_folder(folder_path)
 
     @staticmethod
-    def parse_page_range(page_str: str) -> Optional[List[int]]:
+    def parse_page_range(page_str: Optional[str]) -> Optional[List[int]]:
         return parse_page_range(page_str)
 
 
 __all__ = ["PdfToWordModel"]
-

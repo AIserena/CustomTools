@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Tuple, Union
 from pdf2docx import Converter
 
 
-def parse_page_range(page_str: str) -> Optional[List[int]]:
+def parse_page_range(page_str: Optional[str]) -> Optional[List[int]]:
     """Parse page string like '1-3, 5, 7-10' into 0-based page index list.
     
     If empty or None, returns None (meaning all pages).
@@ -97,7 +97,10 @@ def convert_pdf_to_word_file(
 
     cv = Converter(pdf_path)
     try:
-        cv.convert(docx_path, pages=page_list, **settings)
+        if page_list is None:
+            cv.convert(docx_path, **settings)
+        else:
+            cv.convert(docx_path, pages=page_list, **settings)
     finally:
         cv.close()
 
@@ -119,7 +122,10 @@ def convert_pdf_to_word_memory(
     cv = Converter(stream=pdf_bytes)
     out_stream = io.BytesIO()
     try:
-        cv.convert(out_stream, pages=page_list, **settings)
+        if page_list is None:
+            cv.convert(out_stream, **settings)
+        else:
+            cv.convert(out_stream, pages=page_list, **settings)
     finally:
         cv.close()
 
@@ -198,4 +204,3 @@ def open_folder(folder_path: str):
         subprocess.Popen(["open", folder_path])
     else:
         subprocess.Popen(["xdg-open", folder_path])
-

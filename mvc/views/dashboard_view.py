@@ -62,3 +62,4 @@ class DashboardView(tk.Frame):
             command=lambda: self.controller.show_frame(frame_name),
         )
         button.grid(row=row, column=column, padx=12, pady=10)
+

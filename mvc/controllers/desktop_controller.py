@@ -5,6 +5,7 @@ import tkinter as tk
 from mvc.views.dashboard_view import DashboardView
 from ui_merge_all import PageMergeAllPDF
 from ui_merge_pdf import PageMergePDF
+from ui_media_enhancer import PageMediaEnhancer
 from ui_pdf_to_word import PagePdfToWord
 
 
@@ -30,7 +31,13 @@ class DesktopController:
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        view_classes = (DashboardView, PageMergePDF, PageMergeAllPDF, PagePdfToWord)
+        view_classes = (
+            DashboardView,
+            PageMergePDF,
+            PageMergeAllPDF,
+            PagePdfToWord,
+            PageMediaEnhancer,
+        )
         for view_class in view_classes:
             frame = view_class(parent=container, controller=self)
             self.frames[view_class.__name__] = frame
