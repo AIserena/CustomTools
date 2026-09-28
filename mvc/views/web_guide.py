@@ -42,6 +42,21 @@ GUIDES = {
 4. ⬇️ Unduh file Word per dokumen atau unduh **SEMUA HASIL (.ZIP)**.
 """,
     },
+    "✨ HD+ Video & Foto (Colab AI)": {
+        "title": "💡 Panduan: HD+ Video & Foto via Google Colab GPU",
+        "body": """
+**Mengapa Menggunakan Google Colab?**
+Meningkatkan kualitas foto/video ke resolusi HD atau 4K (*Super Resolution*) dan menajamkan wajah (*Face Restoration*) membutuhkan akselerasi kartu grafis (**GPU**) berdaya tinggi. Dengan mengintegrasikan ke **Google Colab (Gratis GPU T4)**, laptop Anda tidak akan terbebani atau mengalami *freeze*.
+
+**Cara Menjalankan Server di Google Colab:**
+1. 🌐 Buka **[Google Colab](https://colab.research.google.com)** di tab browser Anda dan buat **New Notebook**.
+2. ⚡ Ubah jenis hardware ke GPU: Klik menu **Runtime > Change runtime type > Pilih T4 GPU > Save**.
+3. 📋 Salin kode server yang ada di dalam menu aplikasi (atau file `colab_server_script.py`) lalu paste ke Colab dan klik tombol **Run (▶)**.
+4. 🔗 Tunggu 1-2 menit hingga muncul URL Cloudflare: `https://xxxx-xxxx.trycloudflare.com`.
+5. 📌 Tempelkan URL tersebut ke kolom **URL Google Colab** di aplikasi ini dan klik **Tes Koneksi**.
+6. 🚀 Upload Foto atau Video Anda, atur skala (2x / 4x), lalu klik **MULAI ENHANCE HD+**!
+""",
+    },
 }
 
 
@@ -70,4 +85,3 @@ def show_guide(menu_key: str):
     if st.button("✖ Tutup panduan", key="btn_close_popup", use_container_width=True):
         st.session_state["popup_dismissed"] = True
         st.rerun()
-

@@ -23,6 +23,7 @@ class DashboardView(tk.Frame):
         grid_frame = tk.Frame(self)
         grid_frame.pack(pady=10)
 
+        # Baris 1
         self._create_module_button(
             grid_frame,
             "📄  PENGGABUNG PDF\n(BY NIK)",
@@ -39,13 +40,23 @@ class DashboardView(tk.Frame):
             0,
             1,
         )
+
+        # Baris 2
         self._create_module_button(
             grid_frame,
             "📝  KONVERSI PDF\nKE WORD (.DOCX)",
             "PagePdfToWord",
             "#6f42c1",
+            1,
             0,
-            2,
+        )
+        self._create_module_button(
+            grid_frame,
+            "✨  HD+ VIDEO & FOTO\n(COLAB AI)",
+            "PageMediaEnhancer",
+            "#d93025",
+            1,
+            1,
         )
 
     def _create_module_button(self, parent, label, frame_name, color, row, column):
@@ -61,5 +72,4 @@ class DashboardView(tk.Frame):
             cursor="hand2",
             command=lambda: self.controller.show_frame(frame_name),
         )
-        button.grid(row=row, column=column, padx=12, pady=10)
-
+        button.grid(row=row, column=column, padx=15, pady=12)
