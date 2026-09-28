@@ -1,5 +1,7 @@
 import os
 import datetime
+import threading
+import time
 import streamlit as st
 import streamlit.components.v1 as components
 from mvc.controllers import WebController
@@ -474,6 +476,13 @@ elif menu == "✨ HD+ Video & Foto (Colab AI)":
             key="uploader_foto_hd"
         )
 
+        if uploaded_img:
+            img_kb = round(uploaded_img.size / 1024, 1)
+            st.success(f"✅ Foto siap diproses: **{uploaded_img.name}** ({img_kb} KB)")
+            st.progress(1.0, text="Status Upload: 100% Selesai diterima browser")
+        else:
+            st.caption("ℹ️ Tips: Tunggu lingkaran putar di kotak upload selesai sebelum menekan tombol proses.")
+
         col_opt1, col_opt2 = st.columns(2)
         with col_opt1:
             scale_foto = st.selectbox(
@@ -518,9 +527,11 @@ elif menu == "✨ HD+ Video & Foto (Colab AI)":
             elif not uploaded_img:
                 st.error("⚠️ Harap upload file foto terlebih dahulu!")
             else:
-                with st.spinner("Memproses foto dengan GPU Google Colab... Harap tunggu..."):
+                result_container_img = {}
+
+                def _worker_img():
                     try:
-                        res_bytes, info = WebController.enhance_image(
+                        res_b, inf = WebController.enhance_image(
                             api_url=colab_url,
                             file=uploaded_img,
                             scale=scale_foto,
@@ -528,11 +539,39 @@ elif menu == "✨ HD+ Video & Foto (Colab AI)":
                             model=model_foto,
                             denoise_strength=denoise_val,
                         )
-                        st.session_state["hasil_foto_hd"] = res_bytes
-                        st.session_state["info_foto_hd"] = info
-                        st.session_state["nama_foto_asli"] = uploaded_img.name
-                    except Exception as err:
-                        st.error(f"Gagal memproses foto: {err}")
+                        result_container_img["data"] = (res_b, inf)
+                    except Exception as exc:
+                        result_container_img["error"] = exc
+
+                t_img = threading.Thread(target=_worker_img)
+                t_img.start()
+
+                prog_img = st.progress(10, text="📤 [Tahap 1/3] Mengirim foto ke Google Colab...")
+                start_img_t = time.time()
+                while t_img.is_alive():
+                    elapsed = round(time.time() - start_img_t, 1)
+                    if elapsed < 2.5:
+                        pct = min(45, int(10 + (elapsed / 2.5) * 35))
+                        prog_img.progress(pct, text=f"📤 [Tahap 1/3] Mengirim foto ke GPU Colab... ({elapsed}s)")
+                    elif elapsed < 7.0:
+                        pct = min(85, int(45 + ((elapsed - 2.5) / 4.5) * 40))
+                        prog_img.progress(pct, text=f"🧠 [Tahap 2/3] GPU Colab memproses AI Super Resolution & Face Restoration... ({elapsed}s)")
+                    else:
+                        pct = min(98, int(85 + (elapsed - 7.0) * 1.5))
+                        prog_img.progress(pct, text=f"📥 [Tahap 3/3] Mengambil hasil foto HD+... ({elapsed}s)")
+                    time.sleep(0.2)
+
+                t_img.join()
+                if "data" in result_container_img:
+                    total_time = round(time.time() - start_img_t, 1)
+                    prog_img.progress(100, text=f"✅ Foto HD+ Berhasil Selesai! ({total_time} detik)")
+                    res_bytes, info = result_container_img["data"]
+                    st.session_state["hasil_foto_hd"] = res_bytes
+                    st.session_state["info_foto_hd"] = info
+                    st.session_state["nama_foto_asli"] = uploaded_img.name
+                else:
+                    prog_img.empty()
+                    st.error(f"Gagal memproses foto: {result_container_img.get('error')}")
 
         if st.session_state.get("hasil_foto_hd") is not None:
             st.divider()
@@ -572,12 +611,19 @@ elif menu == "✨ HD+ Video & Foto (Colab AI)":
             key="uploader_video_hd"
         )
 
+        if uploaded_vid:
+            vid_mb = round(uploaded_vid.size / (1024 * 1024), 2)
+            st.success(f"✅ Video siap diproses: **{uploaded_vid.name}** ({vid_mb} MB)")
+            st.progress(1.0, text=f"Status Upload: 100% Selesai ({vid_mb} MB berhasil dimuat ke browser)")
+        else:
+            st.info("ℹ️ **Petunjuk Upload Video**: File video (puluhan MB) membutuhkan waktu transfer upload dari laptop ke browser. Harap tunggu hingga lingkaran berputar di kotak upload selesai sebelum menekan tombol merah.")
+
         col_v1, col_v2 = st.columns(2)
         with col_v1:
             scale_vid = st.selectbox(
                 "Faktor Perbesaran Video:",
                 options=[2, 4],
-                format_func=lambda x: f"{x}x — Rekomendasi Cepat" if x == 2 else f"{x}x — Ultra HD / 4K",
+                format_func=lambda x: f"{x}x — Rekomendasi Cepat (HD)" if x == 2 else f"{x}x — Ultra HD / 4K (Lebih Lama)",
                 key="scale_vid"
             )
         with col_v2:
@@ -600,19 +646,52 @@ elif menu == "✨ HD+ Video & Foto (Colab AI)":
             elif not uploaded_vid:
                 st.error("⚠️ Harap upload file video terlebih dahulu!")
             else:
-                with st.spinner("Memproses video di GPU Google Colab... (Tergantung durasi video)"):
+                vid_mb = round(uploaded_vid.size / (1024 * 1024), 2)
+                result_box_vid = {}
+
+                def _run_vid():
                     try:
-                        res_vid_bytes, info_v = WebController.enhance_video(
+                        res_b, inf = WebController.enhance_video(
                             api_url=colab_url,
                             file=uploaded_vid,
                             scale=scale_vid,
                             face_enhance=face_vid,
                         )
-                        st.session_state["hasil_video_hd"] = res_vid_bytes
-                        st.session_state["info_video_hd"] = info_v
-                        st.session_state["nama_video_asli"] = uploaded_vid.name
+                        result_box_vid["data"] = (res_b, inf)
                     except Exception as err:
-                        st.error(f"Gagal memproses video: {err}")
+                        result_box_vid["error"] = err
+
+                th_vid = threading.Thread(target=_run_vid)
+                th_vid.start()
+
+                prog_vid = st.progress(5, text=f"📤 [Tahap 1/3] Mengirim file video ({vid_mb} MB) ke Google Colab...")
+                start_vid_t = time.time()
+
+                while th_vid.is_alive():
+                    elapsed = round(time.time() - start_vid_t, 1)
+                    if elapsed < 8.0:
+                        pct = min(35, int(5 + (elapsed / 8.0) * 30))
+                        prog_vid.progress(pct, text=f"📤 [Tahap 1/3] Mengirim video ({vid_mb} MB) ke Colab GPU... ({elapsed}s)")
+                    elif elapsed < 45.0:
+                        pct = min(88, int(35 + ((elapsed - 8.0) / 37.0) * 53))
+                        prog_vid.progress(pct, text=f"🧠 [Tahap 2/3] GPU Colab sedang merender & upscaling frame video... ({elapsed}s)")
+                    else:
+                        pct = min(98, int(88 + ((elapsed - 45.0) / 30.0) * 10))
+                        prog_vid.progress(pct, text=f"📥 [Tahap 3/3] Mengompresi dan mengunduh video HD+... ({elapsed}s)")
+                    time.sleep(0.35)
+
+                th_vid.join()
+
+                if "data" in result_box_vid:
+                    total_vid_time = round(time.time() - start_vid_t, 1)
+                    prog_vid.progress(100, text=f"✅ Video HD+ Selesai 100%! ({total_vid_time} detik)")
+                    res_vid_bytes, info_v = result_box_vid["data"]
+                    st.session_state["hasil_video_hd"] = res_vid_bytes
+                    st.session_state["info_video_hd"] = info_v
+                    st.session_state["nama_video_asli"] = uploaded_vid.name
+                else:
+                    prog_vid.empty()
+                    st.error(f"Gagal memproses video: {result_box_vid.get('error')}")
 
         if st.session_state.get("hasil_video_hd") is not None:
             st.divider()
