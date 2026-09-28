@@ -31,7 +31,8 @@ with st.sidebar:
             "📄 Penggabung PDF (by NIK)",
             "📑 Penggabung PDF (by All)",
             "📝 Konversi PDF ke Word",
-            " Tool Lain (Segera Hadir)"
+            "✨ HD+ Video & Foto (Colab AI)",
+            "🔒 Tool Lain (Segera Hadir)"
         ],
         label_visibility="collapsed"
     )
@@ -397,8 +398,240 @@ elif menu == "📝 Konversi PDF ke Word":
                     st.error(f"❌ Gagal mengonversi `{item['source']}`: {item.get('error')}")
 
 
-# --- 7. KONTEN UTAMA: TOOL LAIN ---
+# --- 7. KONTEN UTAMA: HD+ VIDEO & FOTO (INTEGRASI GOOGLE COLAB GPU) ---
+elif menu == "✨ HD+ Video & Foto (Colab AI)":
+    if not st.session_state.get("popup_dismissed"):
+        show_guide("✨ HD+ Video & Foto (Colab AI)")
+
+    st.title("✨ HD+ Video & Foto (AI Super Resolution)")
+    st.markdown(
+        "Tingkatkan resolusi dan kejernihan foto & video menjadi **HD / 4K**, pertajam detail wajah (*Face Restoration*), "
+        "dan hilangkan bintik/noise dengan tenaga akselerasi **GPU Google Colab (Gratis T4)**."
+    )
+    st.divider()
+
+    # --- PENGATURAN KONEKSI GOOGLE COLAB ---
+    st.subheader("1. Koneksi API Google Colab")
+
+    col_c1, col_c2 = st.columns([3, 1])
+    with col_c1:
+        colab_url = st.text_input(
+            "URL API Google Colab (Cloudflare / ngrok):",
+            value=st.session_state.get("colab_api_url", ""),
+            placeholder="Contoh: https://xxxx-xxxx.trycloudflare.com",
+            help="Masukkan public URL yang dihasilkan dari script server di Google Colab",
+            key="input_colab_url"
+        )
+    with col_c2:
+        st.write("")
+        st.write("")
+        btn_ping = st.button("🔌 Tes Koneksi", use_container_width=True, key="btn_ping_colab")
+
+    if colab_url:
+        st.session_state["colab_api_url"] = colab_url.strip()
+
+    if btn_ping:
+        if not colab_url:
+            st.warning("⚠️ Harap isi URL Google Colab terlebih dahulu!")
+        else:
+            with st.spinner("Menghubungkan ke Google Colab..."):
+                health = WebController.ping_colab(colab_url)
+                if health["connected"]:
+                    gpu_info = health.get("details", {}).get("gpu", "GPU Aktif")
+                    st.success(f"🟢 **Terhubung!** Server Google Colab aktif ({gpu_info}).")
+                else:
+                    st.error(f"🔴 **Gagal terhubung:** {health.get('message')}")
+
+    with st.expander("📖 **Cara Menjalankan Server di Google Colab (GPU T4 Gratis)**", expanded=False):
+        st.markdown(
+            """
+            **Langkah Mudah:**
+            1. Buka [Google Colab](https://colab.research.google.com) → Buat **New Notebook**.
+            2. Ubah tipe runtime ke GPU: **Runtime > Change runtime type > T4 GPU > Save**.
+            3. Salin kode Python di bawah ini, paste ke dalam 1 cell, klik **Run (▶)**.
+            4. Tunggu 1–2 menit hingga muncul URL: `https://xxxx-xxxx.trycloudflare.com`.
+            5. Salin URL tersebut dan tempel ke kolom di atas!
+            """
+        )
+        try:
+            with open("colab_server_script.py", "r", encoding="utf-8") as f_script:
+                script_code = f_script.read()
+            st.code(script_code, language="python")
+        except Exception:
+            st.caption("Lihat file `colab_server_script.py` di root direktori proyek.")
+
+    st.divider()
+    st.subheader("2. Pilih Media & Opsi HD+")
+
+    tab_foto, tab_video = st.tabs(["📸 Peningkatan Foto (Image HD+)", "🎥 Peningkatan Video (Video HD+)"])
+
+    # --- TAB 1: FOTO HD+ ---
+    with tab_foto:
+        uploaded_img = st.file_uploader(
+            "Upload Foto / Gambar:",
+            type=["jpg", "jpeg", "png", "webp"],
+            help="Mendukung JPG, PNG, WEBP",
+            key="uploader_foto_hd"
+        )
+
+        col_opt1, col_opt2 = st.columns(2)
+        with col_opt1:
+            scale_foto = st.selectbox(
+                "Faktor Perbesaran Resolusi:",
+                options=[4, 2],
+                format_func=lambda x: f"{x}x — Ultra HD / 4K" if x == 4 else f"{x}x — High Definition",
+                key="scale_foto"
+            )
+            model_foto = st.selectbox(
+                "Model AI:",
+                options=["RealESRGAN_x4plus", "realesr-general-x4v3", "realesr-animevideov3"],
+                format_func=lambda m: (
+                    "Real-ESRGAN (Detail Tajam Standar)" if "x4plus" in m
+                    else ("Real-ESRGAN General (Foto & Denoise)" if "general" in m
+                          else "Real-ESRGAN Anime / Ilustrasi")
+                ),
+                key="model_foto"
+            )
+        with col_opt2:
+            face_enhance = st.checkbox(
+                "Restorasi & Penajaman Detail Wajah",
+                value=True,
+                help="Memperjelas mata, hidung, bibir, dan tekstur wajah secara alami",
+                key="face_foto"
+            )
+            denoise_val = st.slider(
+                "Tingkat Pengurangan Bintik / Noise:",
+                min_value=0.0, max_value=1.0, value=0.5, step=0.1,
+                help="Membantu membersihkan foto lama atau foto berpiksel/buram",
+                key="denoise_foto"
+            )
+
+        st.write("")
+        btn_enhance_img = st.button(
+            "🚀 TINGKATKAN KUALITAS FOTO (HD+)",
+            type="primary", use_container_width=True, key="btn_run_foto"
+        )
+
+        if btn_enhance_img:
+            if not colab_url:
+                st.error("⚠️ Harap masukkan URL Google Colab pada langkah 1!")
+            elif not uploaded_img:
+                st.error("⚠️ Harap upload file foto terlebih dahulu!")
+            else:
+                with st.spinner("Memproses foto dengan GPU Google Colab... Harap tunggu..."):
+                    try:
+                        res_bytes, info = WebController.enhance_image(
+                            api_url=colab_url,
+                            file=uploaded_img,
+                            scale=scale_foto,
+                            face_enhance=face_enhance,
+                            model=model_foto,
+                            denoise_strength=denoise_val,
+                        )
+                        st.session_state["hasil_foto_hd"] = res_bytes
+                        st.session_state["info_foto_hd"] = info
+                        st.session_state["nama_foto_asli"] = uploaded_img.name
+                    except Exception as err:
+                        st.error(f"Gagal memproses foto: {err}")
+
+        if st.session_state.get("hasil_foto_hd") is not None:
+            st.divider()
+            info = st.session_state["info_foto_hd"]
+            st.success(f"🎉 **Foto berhasil ditingkatkan ke HD+!** Diproses dalam {info.get('elapsed_seconds', 0)} detik.")
+
+            col_view1, col_view2 = st.columns(2)
+            with col_view1:
+                st.markdown("##### 📷 Sebelum (Asli)")
+                if uploaded_img:
+                    st.image(uploaded_img, use_container_width=True)
+                orig_dim = info.get("original_dimensions", (0, 0))
+                st.caption(f"Resolusi: **{orig_dim[0]} × {orig_dim[1]}** | {info.get('original_size_kb')} KB")
+            with col_view2:
+                st.markdown("##### ✨ Sesudah (HD+ AI)")
+                st.image(st.session_state["hasil_foto_hd"], use_container_width=True)
+                new_dim = info.get("enhanced_dimensions", (0, 0))
+                st.caption(f"Resolusi: **{new_dim[0]} × {new_dim[1]}** | {info.get('enhanced_size_kb')} KB")
+
+            out_name = f"HD_{os.path.splitext(st.session_state.get('nama_foto_asli', 'foto'))[0]}.png"
+            st.download_button(
+                label=f"⬇️ DOWNLOAD FOTO HD+ ({out_name})",
+                data=st.session_state["hasil_foto_hd"],
+                file_name=out_name,
+                mime="image/png",
+                type="primary",
+                use_container_width=True,
+                key="dl_foto_hd"
+            )
+
+    # --- TAB 2: VIDEO HD+ ---
+    with tab_video:
+        uploaded_vid = st.file_uploader(
+            "Upload Video:",
+            type=["mp4", "mkv", "mov", "avi"],
+            help="Mendukung MP4, MKV, MOV, AVI",
+            key="uploader_video_hd"
+        )
+
+        col_v1, col_v2 = st.columns(2)
+        with col_v1:
+            scale_vid = st.selectbox(
+                "Faktor Perbesaran Video:",
+                options=[2, 4],
+                format_func=lambda x: f"{x}x — Rekomendasi Cepat" if x == 2 else f"{x}x — Ultra HD / 4K",
+                key="scale_vid"
+            )
+        with col_v2:
+            face_vid = st.checkbox(
+                "Restorasi Wajah pada Video",
+                value=False,
+                help="Aktifkan deteksi & penajaman wajah di setiap frame video",
+                key="face_vid"
+            )
+
+        st.write("")
+        btn_enhance_vid = st.button(
+            "🚀 TINGKATKAN KUALITAS VIDEO (HD+)",
+            type="primary", use_container_width=True, key="btn_run_video"
+        )
+
+        if btn_enhance_vid:
+            if not colab_url:
+                st.error("⚠️ Harap masukkan URL Google Colab pada langkah 1!")
+            elif not uploaded_vid:
+                st.error("⚠️ Harap upload file video terlebih dahulu!")
+            else:
+                with st.spinner("Memproses video di GPU Google Colab... (Tergantung durasi video)"):
+                    try:
+                        res_vid_bytes, info_v = WebController.enhance_video(
+                            api_url=colab_url,
+                            file=uploaded_vid,
+                            scale=scale_vid,
+                            face_enhance=face_vid,
+                        )
+                        st.session_state["hasil_video_hd"] = res_vid_bytes
+                        st.session_state["info_video_hd"] = info_v
+                        st.session_state["nama_video_asli"] = uploaded_vid.name
+                    except Exception as err:
+                        st.error(f"Gagal memproses video: {err}")
+
+        if st.session_state.get("hasil_video_hd") is not None:
+            st.divider()
+            info_v = st.session_state["info_video_hd"]
+            st.success(f"🎉 **Video berhasil ditingkatkan ke HD+!** Diproses dalam {info_v.get('elapsed_seconds', 0)} detik.")
+            st.video(st.session_state["hasil_video_hd"])
+            out_vid_name = f"HD_{os.path.splitext(st.session_state.get('nama_video_asli', 'video'))[0]}.mp4"
+            st.download_button(
+                label=f"⬇️ DOWNLOAD VIDEO HD+ ({out_vid_name})",
+                data=st.session_state["hasil_video_hd"],
+                file_name=out_vid_name,
+                mime="video/mp4",
+                type="primary",
+                use_container_width=True,
+                key="dl_video_hd"
+            )
+
+
+# --- 8. KONTEN UTAMA: TOOL LAIN ---
 elif menu == "🔒 Tool Lain (Segera Hadir)":
     st.title("🔒 Tool Lain")
     st.info("Fitur utilitas tambahan sedang dalam tahap pengembangan dan akan segera hadir.")
-
