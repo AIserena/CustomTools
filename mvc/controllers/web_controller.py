@@ -1,6 +1,6 @@
 """Controllers for Streamlit workflows."""
 
-from mvc.models import PdfAllMergeModel, PdfMergeModel, PdfToWordModel
+from mvc.models import CodeGeneratorModel, PdfAllMergeModel, PdfMergeModel, PdfToWordModel
 
 
 class WebController:
@@ -35,4 +35,22 @@ class WebController:
             files=file_tuples,
             pages_spec=pages_spec,
             delete_hyphen=delete_hyphen,
+        )
+
+    @staticmethod
+    def generate_code(
+        content: str,
+        code_type: str,
+        foreground: str = "#000000",
+        background: str = "#FFFFFF",
+        qr_box_size: int = 10,
+        qr_border: int = 4,
+    ) -> bytes:
+        return CodeGeneratorModel.generate(
+            content=content,
+            code_type=code_type,
+            foreground=foreground,
+            background=background,
+            qr_box_size=qr_box_size,
+            qr_border=qr_border,
         )

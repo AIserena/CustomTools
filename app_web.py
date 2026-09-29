@@ -31,6 +31,7 @@ with st.sidebar:
             "📄 Penggabung PDF (by NIK)",
             "📑 Penggabung PDF (by All)",
             "📝 Konversi PDF ke Word",
+            "🔳 QR / Barcode Generator",
             "🔒 Tool Lain (Segera Hadir)"
         ],
         label_visibility="collapsed"
@@ -397,8 +398,98 @@ elif menu == "📝 Konversi PDF ke Word":
                     st.error(f"❌ Gagal mengonversi `{item['source']}`: {item.get('error')}")
 
 
-# --- 7. KONTEN UTAMA: TOOL LAIN ---
+# --- 7. KONTEN UTAMA: QR / BARCODE GENERATOR ---
+elif menu == "🔳 QR / Barcode Generator":
+    st.title("🔳 QR / Barcode Generator")
+    st.markdown(
+        "Buat QR code untuk teks atau URL, atau barcode **Code 128** untuk nomor produk "
+        "dan teks ASCII. Hasil dapat diunduh sebagai PNG."
+    )
+    st.divider()
 
+    code_type = st.selectbox(
+        "Jenis kode:",
+        options=["QR Code", "Barcode (Code 128)"],
+        key="code_generator_type",
+    )
+    code_content = st.text_area(
+        "Konten yang akan disimpan:",
+        placeholder="Masukkan teks, URL, atau nomor produk",
+        key="code_generator_content",
+    )
+    color_col1, color_col2 = st.columns(2)
+    with color_col1:
+        foreground = st.color_picker(
+            "Warna kode:", value="#000000", key="code_generator_foreground"
+        )
+    with color_col2:
+        background = st.color_picker(
+            "Warna latar:", value="#FFFFFF", key="code_generator_background"
+        )
+
+    qr_box_size = 10
+    qr_border = 4
+    if code_type == "QR Code":
+        option_col1, option_col2 = st.columns(2)
+        with option_col1:
+            qr_box_size = st.slider(
+                "Ukuran kotak QR:",
+                min_value=2,
+                max_value=20,
+                value=10,
+                key="code_generator_box_size",
+            )
+        with option_col2:
+            qr_border = st.slider(
+                "Lebar border QR:",
+                min_value=1,
+                max_value=10,
+                value=4,
+                key="code_generator_border",
+            )
+    else:
+        st.caption(
+            "Code 128 cocok untuk barcode produk, nomor seri, dan teks ASCII pendek. "
+            "Pilih QR Code untuk teks Unicode."
+        )
+
+    generator_config = (
+        code_content,
+        code_type,
+        foreground,
+        background,
+        qr_box_size,
+        qr_border,
+    )
+    if st.button("Buat QR / Barcode", type="primary", key="btn_generate_code"):
+        try:
+            st.session_state["generated_code_image"] = WebController.generate_code(
+                content=code_content,
+                code_type=code_type,
+                foreground=foreground,
+                background=background,
+                qr_box_size=qr_box_size,
+                qr_border=qr_border,
+            )
+            st.session_state["generated_code_config"] = generator_config
+        except Exception as exc:
+            st.session_state["generated_code_image"] = None
+            st.error(f"Gagal membuat QR / barcode: {exc}")
+
+    generated_code = st.session_state.get("generated_code_image")
+    if generated_code and st.session_state.get("generated_code_config") == generator_config:
+        st.image(generated_code, caption=f"Hasil {code_type}", use_container_width=True)
+        st.download_button(
+            label="⬇️ Download PNG",
+            data=generated_code,
+            file_name="qr_code.png" if code_type == "QR Code" else "barcode_code128.png",
+            mime="image/png",
+            type="primary",
+            key="download_generated_code",
+        )
+
+
+# --- 8. KONTEN UTAMA: TOOL LAIN ---
 elif menu == "🔒 Tool Lain (Segera Hadir)":
     st.title("🔒 Tool Lain")
     st.info("Fitur utilitas tambahan sedang dalam tahap pengembangan dan akan segera hadir.")

@@ -50,6 +50,15 @@ class DashboardView(tk.Frame):
             1,
             0,
         )
+
+        self._create_module_button(
+            grid_frame,
+            "🔳  QR / BARCODE\nGENERATOR",
+            "PageCodeGenerator",
+            "#00897b",
+            1,
+            1,
+        )
     def _create_module_button(self, parent, label, frame_name, color, row, column):
         button = tk.Button(
             parent,

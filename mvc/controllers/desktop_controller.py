@@ -6,6 +6,7 @@ from mvc.views.dashboard_view import DashboardView
 from ui_merge_all import PageMergeAllPDF
 from ui_merge_pdf import PageMergePDF
 from ui_pdf_to_word import PagePdfToWord
+from ui_code_generator import PageCodeGenerator
 
 
 class DesktopController:
@@ -35,6 +36,7 @@ class DesktopController:
             PageMergePDF,
             PageMergeAllPDF,
             PagePdfToWord,
+            PageCodeGenerator,
         )
         for view_class in view_classes:
             frame = view_class(parent=container, controller=self)
