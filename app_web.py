@@ -471,7 +471,7 @@ elif menu == "🔳 QR / Barcode Generator":
 
     generated_code = st.session_state.get("generated_code_image")
     if generated_code and st.session_state.get("generated_code_config") == generator_config:
-        st.image(generated_code, caption=f"Hasil {code_type}", use_container_width=True)
+        st.image(generated_code, caption=f"Hasil {code_type}", width=250)
         st.download_button(
             label="⬇️ Download PNG",
             data=generated_code,
