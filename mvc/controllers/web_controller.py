@@ -1,6 +1,12 @@
 """Controllers for Streamlit workflows."""
 
-from mvc.models import MediaEnhancerModel, PdfAllMergeModel, PdfMergeModel, PdfToWordModel
+from mvc.models import (
+    BackgroundRemoverModel,
+    MediaEnhancerModel,
+    PdfAllMergeModel,
+    PdfMergeModel,
+    PdfToWordModel,
+)
 
 
 class WebController:
@@ -62,4 +68,34 @@ class WebController:
             scale=scale,
             face_enhance=face_enhance,
             model=model,
+        )
+
+    @staticmethod
+    def remove_background(image_bytes: bytes):
+        return BackgroundRemoverModel.remove_background(image_bytes)
+
+    @staticmethod
+    def export_background_removed_image(
+        image_bytes: bytes,
+        output_format: str,
+        background_color: str,
+        preserve_transparency: bool,
+    ):
+        return BackgroundRemoverModel.export(
+            image_bytes=image_bytes,
+            output_format=output_format,
+            background_color=background_color,
+            preserve_transparency=preserve_transparency,
+        )
+
+    @staticmethod
+    def preview_background_removed_image(
+        image_bytes: bytes,
+        background_color: str,
+        preserve_transparency: bool,
+    ):
+        return BackgroundRemoverModel.preview(
+            image_bytes=image_bytes,
+            background_color=background_color,
+            preserve_transparency=preserve_transparency,
         )

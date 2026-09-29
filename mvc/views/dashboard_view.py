@@ -58,6 +58,14 @@ class DashboardView(tk.Frame):
             1,
             1,
         )
+        self._create_module_button(
+            grid_frame,
+            "🖼️  REMOVE\nBACKGROUND",
+            "PageBackgroundRemover",
+            "#00897b",
+            2,
+            0,
+        )
 
     def _create_module_button(self, parent, label, frame_name, color, row, column):
         button = tk.Button(

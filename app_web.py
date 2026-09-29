@@ -1,5 +1,6 @@
 import os
 import datetime
+import hashlib
 import threading
 import time
 import streamlit as st
@@ -34,6 +35,7 @@ with st.sidebar:
             "📑 Penggabung PDF (by All)",
             "📝 Konversi PDF ke Word",
             "✨ HD+ Video & Foto (Colab AI)",
+            "🖼️ Remove Background",
             "🔒 Tool Lain (Segera Hadir)"
         ],
         label_visibility="collapsed"
@@ -710,7 +712,102 @@ elif menu == "✨ HD+ Video & Foto (Colab AI)":
             )
 
 
-# --- 8. KONTEN UTAMA: TOOL LAIN ---
+# --- 8. KONTEN UTAMA: REMOVE BACKGROUND ---
+elif menu == "🖼️ Remove Background":
+    st.title("🖼️ Remove Background")
+    st.markdown(
+        "Hapus latar gambar secara otomatis dengan AI lokal, pilih warna latar baru, "
+        "lalu simpan sebagai PNG, JPG, ICO, WEBP, BMP, atau TIFF."
+    )
+    st.info("Pemrosesan dilakukan di perangkat/server aplikasi. Model AI mungkin diunduh saat pertama kali digunakan.")
+    st.divider()
+
+    uploaded_bg_image = st.file_uploader(
+        "Pilih gambar:",
+        type=["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff"],
+        key="uploader_remove_bg",
+    )
+
+    col_bg_color, col_bg_format, col_bg_transparency = st.columns([1, 1, 1])
+    with col_bg_color:
+        background_color = st.color_picker(
+            "Warna latar baru:",
+            value="#FFFFFF",
+            key="remove_bg_color",
+        )
+    with col_bg_format:
+        output_format = st.selectbox(
+            "Format simpan:",
+            options=["PNG", "JPG", "ICO", "WEBP", "BMP", "TIFF"],
+            key="remove_bg_format",
+        )
+    with col_bg_transparency:
+        preserve_transparency = st.checkbox(
+            "Pertahankan transparansi",
+            value=False,
+            help="Berlaku untuk PNG, ICO, WEBP, dan TIFF. Format JPG/BMP selalu memakai warna latar.",
+            key="remove_bg_transparency",
+        )
+
+    if uploaded_bg_image:
+        source_image_bytes = uploaded_bg_image.getvalue()
+        source_fingerprint = hashlib.sha256(source_image_bytes).hexdigest()
+        if st.session_state.get("remove_bg_source") != source_fingerprint:
+            st.session_state["remove_bg_source"] = source_fingerprint
+            st.session_state["remove_bg_result"] = None
+            st.session_state["remove_bg_filename"] = uploaded_bg_image.name
+
+        st.caption(f"File: **{uploaded_bg_image.name}**")
+        if st.button("✂️ HAPUS BACKGROUND", type="primary", key="btn_remove_bg"):
+            with st.spinner("AI sedang menghapus background gambar..."):
+                try:
+                    st.session_state["remove_bg_result"] = WebController.remove_background(
+                        source_image_bytes
+                    )
+                    st.session_state["remove_bg_filename"] = uploaded_bg_image.name
+                except Exception as exc:
+                    st.error(f"Gagal menghapus background: {exc}")
+
+        removed_image = st.session_state.get("remove_bg_result")
+        if removed_image:
+            preview_bytes = WebController.preview_background_removed_image(
+                removed_image,
+                background_color=background_color,
+                preserve_transparency=(
+                    preserve_transparency and output_format in {"PNG", "ICO", "WEBP", "TIFF"}
+                ),
+            )
+            preview_col1, preview_col2 = st.columns(2)
+            with preview_col1:
+                st.markdown("##### Sebelum")
+                st.image(source_image_bytes, use_container_width=True)
+            with preview_col2:
+                st.markdown("##### Sesudah")
+                st.image(preview_bytes, use_container_width=True)
+
+            converted_bytes, mime_type, extension = WebController.export_background_removed_image(
+                removed_image,
+                output_format=output_format,
+                background_color=background_color,
+                preserve_transparency=preserve_transparency,
+            )
+            base_name = os.path.splitext(
+                st.session_state.get("remove_bg_filename", "gambar")
+            )[0]
+            st.download_button(
+                label=f"⬇️ DOWNLOAD HASIL ({output_format})",
+                data=converted_bytes,
+                file_name=f"{base_name}_no_bg{extension}",
+                mime=mime_type,
+                type="primary",
+                key="dl_remove_bg",
+            )
+    else:
+        st.session_state["remove_bg_result"] = None
+        st.session_state["remove_bg_source"] = None
+
+
+# --- 9. KONTEN UTAMA: TOOL LAIN ---
 elif menu == "🔒 Tool Lain (Segera Hadir)":
     st.title("🔒 Tool Lain")
     st.info("Fitur utilitas tambahan sedang dalam tahap pengembangan dan akan segera hadir.")

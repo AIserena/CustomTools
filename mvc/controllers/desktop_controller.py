@@ -6,6 +6,7 @@ from mvc.views.dashboard_view import DashboardView
 from ui_merge_all import PageMergeAllPDF
 from ui_merge_pdf import PageMergePDF
 from ui_media_enhancer import PageMediaEnhancer
+from ui_background_remover import PageBackgroundRemover
 from ui_pdf_to_word import PagePdfToWord
 
 
@@ -37,6 +38,7 @@ class DesktopController:
             PageMergeAllPDF,
             PagePdfToWord,
             PageMediaEnhancer,
+            PageBackgroundRemover,
         )
         for view_class in view_classes:
             frame = view_class(parent=container, controller=self)
