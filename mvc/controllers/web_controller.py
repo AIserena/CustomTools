@@ -43,14 +43,12 @@ class WebController:
         code_type: str,
         foreground: str = "#000000",
         background: str = "#FFFFFF",
-        qr_box_size: int = 10,
-        qr_border: int = 4,
+        qr_size_cm: float = 4.0,
     ) -> bytes:
         return CodeGeneratorModel.generate(
             content=content,
             code_type=code_type,
             foreground=foreground,
             background=background,
-            qr_box_size=qr_box_size,
-            qr_border=qr_border,
+            qr_size_cm=qr_size_cm,
         )

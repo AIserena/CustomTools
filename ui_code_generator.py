@@ -72,30 +72,23 @@ class PageCodeGenerator(tk.Frame):
 
         self.qr_options = tk.Frame(content)
         self.qr_options.grid(row=3, column=1, sticky="w", pady=5)
-        tk.Label(self.qr_options, text="Ukuran QR:").pack(side="left")
-        self.qr_box_size = tk.IntVar(value=10)
-        box_size_spinbox = ttk.Spinbox(
+        tk.Label(self.qr_options, text="Ukuran hasil QR:").pack(side="left")
+        self.qr_size_var = tk.StringVar(value="4 × 4 cm")
+        self.qr_size_box = ttk.Combobox(
             self.qr_options,
-            from_=1,
-            to=40,
-            textvariable=self.qr_box_size,
-            width=5,
+            textvariable=self.qr_size_var,
+            values=list(CodeGeneratorModel.QR_SIZE_PRESETS),
+            state="readonly",
+            width=30,
         )
-        box_size_spinbox.pack(side="left", padx=(5, 14))
-        tk.Label(self.qr_options, text="Border:").pack(side="left")
-        self.qr_border = tk.IntVar(value=4)
-        border_spinbox = ttk.Spinbox(
+        self.qr_size_box.pack(side="left", padx=(8, 0))
+        self.qr_size_box.bind("<<ComboboxSelected>>", self._on_qr_option_changed)
+        tk.Label(
             self.qr_options,
-            from_=0,
-            to=20,
-            textvariable=self.qr_border,
-            width=5,
-        )
-        border_spinbox.pack(side="left", padx=5)
-        for spinbox in (box_size_spinbox, border_spinbox):
-            spinbox.bind("<KeyRelease>", self._on_qr_option_changed)
-            spinbox.bind("<<Increment>>", self._on_qr_option_changed)
-            spinbox.bind("<<Decrement>>", self._on_qr_option_changed)
+            text="(ukuran cetak PNG, 300 DPI)",
+            font=("Segoe UI", 8, "italic"),
+            fg="gray",
+        ).pack(side="left", padx=8)
         self.code_type_box.bind("<<ComboboxSelected>>", self._on_type_changed)
 
         self.preview = tk.Label(content, text="Pratinjau hasil akan tampil di sini")
@@ -135,7 +128,7 @@ class PageCodeGenerator(tk.Frame):
             self._invalidate_result()
 
     def _on_qr_option_changed(self, event):
-        if event.widget in (self.qr_options.winfo_children()):
+        if event.widget is self.qr_size_box:
             self._invalidate_result()
 
     def _invalidate_result(self):
@@ -171,8 +164,7 @@ class PageCodeGenerator(tk.Frame):
                 code_type=self.code_type.get(),
                 foreground=self.foreground,
                 background=self.background,
-                qr_box_size=self.qr_box_size.get(),
-                qr_border=self.qr_border.get(),
+                qr_size_cm=CodeGeneratorModel.QR_SIZE_PRESETS[self.qr_size_var.get()],
             )
             with Image.open(io.BytesIO(self.generated_bytes)) as image:
                 preview_image = image.copy()

@@ -3,6 +3,7 @@ import datetime
 import streamlit as st
 import streamlit.components.v1 as components
 from mvc.controllers import WebController
+from mvc.models import CodeGeneratorModel
 from mvc.views.web_guide import show_guide
 
 # --- 1. KOMPONEN CUSTOM DRAG & DROP ---
@@ -427,26 +428,20 @@ elif menu == "🔳 QR / Barcode Generator":
             "Warna latar:", value="#FFFFFF", key="code_generator_background"
         )
 
-    qr_box_size = 10
-    qr_border = 4
+    qr_size_presets = CodeGeneratorModel.QR_SIZE_PRESETS
+    qr_size_cm = qr_size_presets["4 × 4 cm"]
     if code_type == "QR Code":
-        option_col1, option_col2 = st.columns(2)
-        with option_col1:
-            qr_box_size = st.slider(
-                "Ukuran kotak QR:",
-                min_value=2,
-                max_value=20,
-                value=10,
-                key="code_generator_box_size",
-            )
-        with option_col2:
-            qr_border = st.slider(
-                "Lebar border QR:",
-                min_value=1,
-                max_value=10,
-                value=4,
-                key="code_generator_border",
-            )
+        qr_size_label = st.selectbox(
+            "Ukuran QR untuk cetak:",
+            options=list(qr_size_presets),
+            index=list(qr_size_presets).index("4 × 4 cm"),
+            key="code_generator_size_cm",
+        )
+        qr_size_cm = qr_size_presets[qr_size_label]
+        st.caption(
+            "PNG disiapkan pada 300 DPI dengan kanvas persegi sesuai ukuran pilihan. "
+            "Opsi 1R memakai sisi pendek foto 1R (6,35 cm); ukuran dapat diubah lagi di aplikasi desain."
+        )
     else:
         st.caption(
             "Code 128 cocok untuk barcode produk, nomor seri, dan teks ASCII pendek. "
@@ -458,8 +453,7 @@ elif menu == "🔳 QR / Barcode Generator":
         code_type,
         foreground,
         background,
-        qr_box_size,
-        qr_border,
+        qr_size_cm,
     )
     if st.button("Buat QR / Barcode", type="primary", key="btn_generate_code"):
         try:
@@ -468,8 +462,7 @@ elif menu == "🔳 QR / Barcode Generator":
                 code_type=code_type,
                 foreground=foreground,
                 background=background,
-                qr_box_size=qr_box_size,
-                qr_border=qr_border,
+                qr_size_cm=qr_size_cm,
             )
             st.session_state["generated_code_config"] = generator_config
         except Exception as exc:
