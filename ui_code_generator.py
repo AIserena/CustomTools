@@ -6,6 +6,7 @@ from tkinter import colorchooser, filedialog, messagebox, ttk
 from PIL import Image, ImageTk
 
 from mvc.models import CodeGeneratorModel
+from mvc.models.code_generator_model import QR_SIZE_PRESETS
 
 
 class PageCodeGenerator(tk.Frame):
@@ -77,7 +78,7 @@ class PageCodeGenerator(tk.Frame):
         self.qr_size_box = ttk.Combobox(
             self.qr_options,
             textvariable=self.qr_size_var,
-            values=list(CodeGeneratorModel.QR_SIZE_PRESETS),
+            values=list(QR_SIZE_PRESETS),
             state="readonly",
             width=30,
         )
@@ -164,7 +165,7 @@ class PageCodeGenerator(tk.Frame):
                 code_type=self.code_type.get(),
                 foreground=self.foreground,
                 background=self.background,
-                qr_size_cm=CodeGeneratorModel.QR_SIZE_PRESETS[self.qr_size_var.get()],
+                qr_size_cm=QR_SIZE_PRESETS[self.qr_size_var.get()],
             )
             with Image.open(io.BytesIO(self.generated_bytes)) as image:
                 preview_image = image.copy()

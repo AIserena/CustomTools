@@ -3,7 +3,7 @@ import datetime
 import streamlit as st
 import streamlit.components.v1 as components
 from mvc.controllers import WebController
-from mvc.models import CodeGeneratorModel
+from mvc.models.code_generator_model import QR_SIZE_PRESETS
 from mvc.views.web_guide import show_guide
 
 # --- 1. KOMPONEN CUSTOM DRAG & DROP ---
@@ -428,7 +428,7 @@ elif menu == "🔳 QR / Barcode Generator":
             "Warna latar:", value="#FFFFFF", key="code_generator_background"
         )
 
-    qr_size_presets = CodeGeneratorModel.QR_SIZE_PRESETS
+    qr_size_presets = QR_SIZE_PRESETS
     qr_size_cm = qr_size_presets["4 × 4 cm"]
     if code_type == "QR Code":
         qr_size_label = st.selectbox(

@@ -5,6 +5,8 @@ from mvc.models.code_generator_operations import (
     generate_code_image,
 )
 
+QR_SIZE_PRESETS = _QR_SIZE_PRESETS
+
 
 class CodeGeneratorModel:
     """Application-facing API for generating QR and Code 128 images."""
