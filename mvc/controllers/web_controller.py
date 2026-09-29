@@ -75,6 +75,10 @@ class WebController:
         return BackgroundRemoverModel.remove_background(image_bytes)
 
     @staticmethod
+    def estimate_background_removal_progress(elapsed_seconds: float) -> int:
+        return BackgroundRemoverModel.estimate_progress(elapsed_seconds)
+
+    @staticmethod
     def export_background_removed_image(
         image_bytes: bytes,
         output_format: str,

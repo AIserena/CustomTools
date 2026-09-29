@@ -3,6 +3,7 @@
 from typing import Tuple
 
 from mvc.models.background_remover_operations import (
+    estimate_removal_progress,
     export_image,
     make_preview,
     remove_image_background,
@@ -15,6 +16,10 @@ class BackgroundRemoverModel:
     @staticmethod
     def remove_background(image_bytes: bytes) -> bytes:
         return remove_image_background(image_bytes)
+
+    @staticmethod
+    def estimate_progress(elapsed_seconds: float) -> int:
+        return estimate_removal_progress(elapsed_seconds)
 
     @staticmethod
     def export(

@@ -759,14 +759,43 @@ elif menu == "🖼️ Remove Background":
 
         st.caption(f"File: **{uploaded_bg_image.name}**")
         if st.button("✂️ HAPUS BACKGROUND", type="primary", key="btn_remove_bg"):
-            with st.spinner("AI sedang menghapus background gambar..."):
+            removal_result = {}
+
+            def _remove_background_worker():
                 try:
-                    st.session_state["remove_bg_result"] = WebController.remove_background(
-                        source_image_bytes
-                    )
-                    st.session_state["remove_bg_filename"] = uploaded_bg_image.name
+                    removal_result["image"] = WebController.remove_background(source_image_bytes)
                 except Exception as exc:
-                    st.error(f"Gagal menghapus background: {exc}")
+                    removal_result["error"] = exc
+
+            started_at = time.monotonic()
+            removal_thread = threading.Thread(target=_remove_background_worker, daemon=True)
+            removal_thread.start()
+            progress_bar = st.progress(10, text="Menyiapkan AI untuk menghapus background...")
+            progress_text = st.empty()
+
+            while removal_thread.is_alive():
+                elapsed = time.monotonic() - started_at
+                progress_percent = WebController.estimate_background_removal_progress(elapsed)
+                progress_bar.progress(
+                    progress_percent,
+                    text=f"AI menghapus background... sekitar {progress_percent}% (estimasi)",
+                )
+                progress_text.caption(
+                    f"Pemrosesan berjalan selama {elapsed:.0f} detik. "
+                    "Persentase adalah estimasi; model AI tidak menyediakan progres pasti."
+                )
+                time.sleep(0.25)
+
+            removal_thread.join()
+            if "error" in removal_result:
+                progress_bar.empty()
+                progress_text.empty()
+                st.error(f"Gagal menghapus background: {removal_result['error']}")
+            else:
+                st.session_state["remove_bg_result"] = removal_result["image"]
+                st.session_state["remove_bg_filename"] = uploaded_bg_image.name
+                progress_bar.progress(100, text="Background berhasil dihapus — 100%")
+                progress_text.empty()
 
         removed_image = st.session_state.get("remove_bg_result")
         if removed_image:

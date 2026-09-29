@@ -1,6 +1,7 @@
 """Image background removal and export operations."""
 
 import io
+import math
 from typing import Tuple
 
 from PIL import Image, ImageColor
@@ -17,6 +18,12 @@ SUPPORTED_FORMATS = {
 }
 
 TRANSPARENT_FORMATS = {"PNG", "ICO", "WEBP", "TIFF"}
+
+
+def estimate_removal_progress(elapsed_seconds: float) -> int:
+    """Estimate progress while rembg runs, whose inference API has no progress callback."""
+    elapsed = max(0.0, elapsed_seconds)
+    return min(95, round(10 + 85 * (1 - math.exp(-elapsed / 20))))
 
 
 def remove_image_background(image_bytes: bytes) -> bytes:

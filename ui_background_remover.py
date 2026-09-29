@@ -1,6 +1,7 @@
 import io
 import os
 import threading
+import time
 import tkinter as tk
 from tkinter import colorchooser, filedialog, messagebox, ttk
 
@@ -29,6 +30,7 @@ class PageBackgroundRemover(tk.Frame):
         self.source_name = "gambar"
         self.background_color = "#FFFFFF"
         self.preview_photo = None
+        self.is_processing = False
         self._build()
 
     def _build(self):
@@ -83,6 +85,8 @@ class PageBackgroundRemover(tk.Frame):
 
         self.preview = tk.Label(content, text="Pratinjau hasil akan tampil di sini")
         self.preview.pack(fill="both", expand=True, pady=8)
+        self.progress = ttk.Progressbar(content, orient="horizontal", mode="determinate", maximum=100)
+        self.progress.pack(fill="x", pady=(8, 2))
         self.status = tk.Label(content, text="Pilih gambar untuk memulai.", fg="#555555")
         self.status.pack(anchor="w", pady=5)
 
@@ -140,8 +144,12 @@ class PageBackgroundRemover(tk.Frame):
             return
 
         image_bytes = self.source_bytes
+        self.is_processing = True
+        self.processing_started_at = time.monotonic()
         self.remove_button.config(state="disabled")
-        self.status.config(text="AI sedang menghapus background...", fg="#0066cc")
+        self.progress["value"] = 10
+        self.status.config(text="Menyiapkan AI... 10% (estimasi)", fg="#0066cc")
+        self._update_progress()
 
         def worker():
             try:
@@ -152,15 +160,34 @@ class PageBackgroundRemover(tk.Frame):
 
         threading.Thread(target=worker, daemon=True).start()
 
+    def _update_progress(self):
+        if not self.is_processing:
+            return
+        elapsed = time.monotonic() - self.processing_started_at
+        progress = BackgroundRemoverModel.estimate_progress(elapsed)
+        self.progress["value"] = progress
+        self.status.config(
+            text=(
+                f"AI sedang menghapus background... sekitar {progress}% (estimasi). "
+                "Persentase pasti tidak tersedia dari model."
+            ),
+            fg="#0066cc",
+        )
+        self.after(250, self._update_progress)
+
     def _removal_succeeded(self, result):
+        self.is_processing = False
         self.removed_bytes = result
         self.remove_button.config(state="normal")
         self.save_button.config(state="normal")
+        self.progress["value"] = 100
         self.status.config(text="Background berhasil dihapus.", fg="#188038")
         self._refresh_preview()
 
     def _removal_failed(self, error):
+        self.is_processing = False
         self.remove_button.config(state="normal")
+        self.progress["value"] = 0
         self.status.config(text="Gagal menghapus background.", fg="#c5221f")
         messagebox.showerror("Gagal memproses gambar", error)
 
