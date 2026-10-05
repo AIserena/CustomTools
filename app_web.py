@@ -38,6 +38,31 @@ with st.sidebar:
         ],
         label_visibility="collapsed"
     )
+    st.markdown(
+        """
+        <div style="
+            position: fixed;
+            bottom: 1.25rem;
+            left: 1rem;
+            width: 11rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(49, 51, 63, 0.2);
+            background-color: #f0f2f6;
+            z-index: 100;
+        ">
+            <strong>Tech Support</strong><br>
+            WhatsApp:
+            <a href="https://wa.me/6281388183368" target="_blank">
+                0813-8818-3368
+            </a><br>
+            Email:
+            <a href="mailto:itfernandoo@gmail.com">
+                itfernandoo@gmail.com
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # --- KONTEN UTAMA: MONITORING ABSENSI ---
 if menu == "📊 Monitoring Absensi":
