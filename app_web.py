@@ -18,16 +18,46 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 3. SIDEBAR BRANDING & NAVIGASI ---
+# --- 3. SIDEBAR BRANDING & TECH SUPPORT ---
 with st.sidebar:
     st.title("CUSTOM")
     st.markdown("")
     st.caption("CUSTOM TOOLS")
     st.divider()
 
-    st.markdown("#### **MENU:**")
+    st.markdown(
+        """
+        <div style="
+            position: fixed;
+            bottom: 1rem;
+            left: 0.75rem;
+            width: 12rem;
+            box-sizing: border-box;
+            padding: 0.75rem 0.5rem;
+            border-top: 1px solid rgba(49, 51, 63, 0.2);
+            background-color: #f0f2f6;
+            z-index: 100;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        ">
+            <strong>Tech Support</strong>
+            <div>WhatsApp:
+                <a href="https://wa.me/6281388183368" target="_blank"
+                   style="white-space: nowrap;">0813-8818-3368</a>
+            </div>
+            <div>Email:
+                <a href="mailto:itfernandoo@gmail.com"
+                   style="white-space: nowrap;">itfernandoo@gmail.com</a>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# --- 4. NAVIGASI UTAMA ---
+with st.container(border=True):
     menu = st.radio(
-        "Navigasi",
+        "Menu",
         options=[
             "📊 Monitoring Absensi",
             "📄 Penggabung PDF (by NIK)",
@@ -36,35 +66,12 @@ with st.sidebar:
             "🔳 QR / Barcode Generator",
             "🔒 Tool Lain (Segera Hadir)"
         ],
-        label_visibility="collapsed"
-    )
-    st.markdown(
-        """
-        <div style="
-            position: fixed;
-            bottom: 1.25rem;
-            left: 1rem;
-            width: 11rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid rgba(49, 51, 63, 0.2);
-            background-color: #f0f2f6;
-            z-index: 100;
-        ">
-            <strong>Tech Support</strong><br>
-            WhatsApp:
-            <a href="https://wa.me/6281388183368" target="_blank">
-                0813-8818-3368
-            </a><br>
-            Email:
-            <a href="mailto:itfernandoo@gmail.com">
-                itfernandoo@gmail.com
-            </a>
-        </div>
-        """,
-        unsafe_allow_html=True,
+        horizontal=True,
+        label_visibility="collapsed",
+        key="main_navigation",
     )
 
-# --- KONTEN UTAMA: MONITORING ABSENSI ---
+# --- 5. KONTEN UTAMA: MONITORING ABSENSI ---
 if menu == "📊 Monitoring Absensi":
     st.title("📊 Monitoring Absensi")
     st.markdown(
