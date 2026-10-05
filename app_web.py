@@ -43,22 +43,26 @@ with st.sidebar:
         <div style="
             position: fixed;
             bottom: 1.25rem;
-            left: 1rem;
-            width: 11rem;
-            padding-top: 0.75rem;
+            right: 1rem;
+            width: 16rem;
+            box-sizing: border-box;
+            padding: 0.75rem;
             border-top: 1px solid rgba(49, 51, 63, 0.2);
             background-color: #f0f2f6;
             z-index: 100;
+            line-height: 1.6;
         ">
-            <strong>Tech Support</strong><br>
+            <strong>Tech Support</strong>
+            <div>
             WhatsApp:
-            <a href="https://wa.me/6281388183368" target="_blank">
-                0813-8818-3368
-            </a><br>
+            <a href="https://wa.me/6281388183368" target="_blank"
+               style="white-space: nowrap;">0813-8818-3368</a>
+            </div>
+            <div>
             Email:
-            <a href="mailto:itfernandoo@gmail.com">
-                itfernandoo@gmail.com
-            </a>
+            <a href="mailto:itfernandoo@gmail.com"
+               style="white-space: nowrap;">itfernandoo@gmail.com</a>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
