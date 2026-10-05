@@ -47,7 +47,6 @@ with st.sidebar:
             width: 16rem;
             box-sizing: border-box;
             padding: 0.75rem;
-            border-top: 1px solid rgba(49, 51, 63, 0.2);
             background-color: #ffffff;
             z-index: 100;
             line-height: 1.6;
