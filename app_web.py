@@ -15,47 +15,59 @@ st.set_page_config(
     page_title="CUSTOM TOOLS",
     page_icon="📄",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# --- 3. SIDEBAR BRANDING & TECH SUPPORT ---
-with st.sidebar:
-    st.title("CUSTOM")
-    st.markdown("")
-    st.caption("CUSTOM TOOLS")
-    st.divider()
-
-    st.markdown(
-        """
-        <div style="
-            position: fixed;
-            bottom: 1rem;
-            left: 0.75rem;
-            width: 12rem;
-            box-sizing: border-box;
-            padding: 0.75rem 0.5rem;
-            border-top: 1px solid rgba(49, 51, 63, 0.2);
-            background-color: #f0f2f6;
-            z-index: 100;
-            font-size: 0.85rem;
-            line-height: 1.6;
-        ">
-            <strong>Tech Support</strong>
-            <div>WhatsApp:
-                <a href="https://wa.me/6281388183368" target="_blank"
-                   style="white-space: nowrap;">0813-8818-3368</a>
-            </div>
-            <div>Email:
-                <a href="mailto:itfernandoo@gmail.com"
-                   style="white-space: nowrap;">itfernandoo@gmail.com</a>
-            </div>
+# --- 3. HEADER & NAVIGASI ---
+st.markdown(
+    """
+    <style>
+        [data-testid="stSidebar"] {display: none;}
+        [data-testid="stHeader"] {background: transparent;}
+        [data-testid="stAppViewContainer"] {background: #f2f3f6;}
+        [data-testid="stAppViewContainer"] .main .block-container {
+            padding-top: 1rem;
+            max-width: 100%;
+        }
+        div[data-testid="stRadio"] {
+            margin: 0 -1rem 1.5rem;
+            padding: 0.65rem 1.5rem;
+            background: white;
+            border-bottom: 1px solid #dedfe3;
+        }
+        div[role="radiogroup"] {
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+    </style>
+    <div style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: -1rem -1rem 0;
+        padding: 1rem 2rem;
+        color: white;
+        background: #4037c5;
+    ">
+        <strong style="font-size: 1.15rem;">CUSTOM TOOLS</strong>
+        <div style="text-align: right; font-size: 0.82rem; line-height: 1.6;">
+            <strong>Tech Support</strong><br>
+            WhatsApp:
+            <a href="https://wa.me/6281388183368" target="_blank"
+               style="color: white; white-space: nowrap;">0813-8818-3368</a>
+            &nbsp;|&nbsp;
+            Email:
+            <a href="mailto:itfernandoo@gmail.com"
+               style="color: white; white-space: nowrap;">itfernandoo@gmail.com</a>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # --- 4. NAVIGASI UTAMA ---
-with st.container(border=True):
+with st.container():
     menu = st.radio(
         "Menu",
         options=[
