@@ -7,6 +7,7 @@ from ui_merge_all import PageMergeAllPDF
 from ui_merge_pdf import PageMergePDF
 from ui_pdf_to_word import PagePdfToWord
 from ui_code_generator import PageCodeGenerator
+from ui_monitoring_absensi import PageMonitoringAbsensi
 
 
 class DesktopController:
@@ -37,6 +38,7 @@ class DesktopController:
             PageMergeAllPDF,
             PagePdfToWord,
             PageCodeGenerator,
+            PageMonitoringAbsensi,
         )
         for view_class in view_classes:
             frame = view_class(parent=container, controller=self)

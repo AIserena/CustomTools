@@ -1,6 +1,12 @@
 """Controllers for Streamlit workflows."""
 
-from mvc.models import CodeGeneratorModel, PdfAllMergeModel, PdfMergeModel, PdfToWordModel
+from mvc.models import (
+    AttendanceModel,
+    CodeGeneratorModel,
+    PdfAllMergeModel,
+    PdfMergeModel,
+    PdfToWordModel,
+)
 
 
 class WebController:
@@ -54,3 +60,7 @@ class WebController:
             qr_box_size=qr_box_size,
             qr_border=qr_border,
         )
+
+    @staticmethod
+    def process_attendance_report(filename: str, file_bytes: bytes):
+        return AttendanceModel.process_report(filename, file_bytes)

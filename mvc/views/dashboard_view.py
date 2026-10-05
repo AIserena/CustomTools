@@ -59,6 +59,15 @@ class DashboardView(tk.Frame):
             1,
             1,
         )
+
+        self._create_module_button(
+            grid_frame,
+            "📊  MONITORING\nABSENSI",
+            "PageMonitoringAbsensi",
+            "#e67e22",
+            2,
+            0,
+        )
     def _create_module_button(self, parent, label, frame_name, color, row, column):
         button = tk.Button(
             parent,

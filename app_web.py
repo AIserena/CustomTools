@@ -1,5 +1,6 @@
 import os
 import datetime
+import hashlib
 import streamlit as st
 import streamlit.components.v1 as components
 from mvc.controllers import WebController
@@ -28,6 +29,7 @@ with st.sidebar:
     menu = st.radio(
         "Navigasi",
         options=[
+            "📊 Monitoring Absensi",
             "📄 Penggabung PDF (by NIK)",
             "📑 Penggabung PDF (by All)",
             "📝 Konversi PDF ke Word",
@@ -36,6 +38,74 @@ with st.sidebar:
         ],
         label_visibility="collapsed"
     )
+
+# --- KONTEN UTAMA: MONITORING ABSENSI ---
+if menu == "📊 Monitoring Absensi":
+    st.title("📊 Monitoring Absensi")
+    st.markdown(
+        "Unggah laporan **Leave / Trip Report** format Excel untuk merangkum absensi "
+        "dan kedisiplinan per karyawan."
+    )
+    st.caption(
+        "SAKIT SURAT DOKTER dan ALPHA dihitung sebagai absensi. Keterangan IJIN "
+        "dihitung sebagai kedisiplinan. Setiap baris laporan dihitung sebagai satu kejadian."
+    )
+    st.divider()
+
+    attendance_file = st.file_uploader(
+        "Unggah laporan absensi (.xls atau .xlsx)",
+        type=["xls", "xlsx"],
+        key="attendance_report",
+    )
+    attendance_digest = (
+        hashlib.sha256(attendance_file.getvalue()).hexdigest()
+        if attendance_file is not None
+        else None
+    )
+    if st.button("Proses Monitoring Absensi", type="primary", key="btn_attendance"):
+        if attendance_file is None:
+            st.error("Silakan unggah file laporan absensi terlebih dahulu.")
+        else:
+            try:
+                records, workbook_bytes = WebController.process_attendance_report(
+                    attendance_file.name,
+                    attendance_file.getvalue(),
+                )
+                st.session_state["attendance_result"] = {
+                    "filename": attendance_file.name,
+                    "digest": attendance_digest,
+                    "rows": [record.as_row() for record in records],
+                    "workbook": workbook_bytes,
+                }
+            except (OSError, ValueError) as exc:
+                st.session_state.pop("attendance_result", None)
+                st.error(f"Gagal memproses laporan: {exc}")
+
+    result = st.session_state.get("attendance_result")
+    if (
+        result
+        and attendance_file
+        and result["filename"] == attendance_file.name
+        and result["digest"] == attendance_digest
+    ):
+        st.success(f"Berhasil merangkum {len(result['rows'])} karyawan.")
+        st.dataframe(
+            result["rows"],
+            column_config={
+                "SKOR ABSENSI": st.column_config.NumberColumn("SKOR"),
+                "SKOR KEDISIPLINAN": st.column_config.NumberColumn("SKOR"),
+            },
+            use_container_width=True,
+            hide_index=True,
+        )
+        st.download_button(
+            "⬇️ Download Hasil Excel",
+            data=result["workbook"],
+            file_name="Monitoring_Absensi.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="primary",
+            key="download_attendance",
+        )
 
 # Tracking popup per menu (reset saat ganti menu)
 if "popup_last_menu" not in st.session_state:
