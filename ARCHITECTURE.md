@@ -41,3 +41,4 @@ The desktop controller registers every view used by the dashboard before navigat
 - **Controllers** coordinate user input, model calls, and navigation/state transitions.
 - **Views** render Tkinter or Streamlit UI and delegate operations to controllers/models.
 - **Monitoring Absensi** accepts `.xls`/`.xlsx` attendance reports in both interfaces and exports the deduplicated category summary as `.xlsx`.
+- **Streamlit startup** loads feature models on demand so unused PDF and Excel dependencies do not delay the initial page.
