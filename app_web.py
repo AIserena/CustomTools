@@ -42,25 +42,26 @@ with st.sidebar:
         """
         <div style="
             position: fixed;
-            bottom: 1.25rem;
-            right: 1rem;
-            width: 16rem;
+            bottom: 1rem;
+            left: 0.75rem;
+            width: min(14.5rem, calc(100vw - 1.5rem));
+            max-height: calc(100vh - 2rem);
             box-sizing: border-box;
             padding: 0.75rem;
-            background-color: #ffffff;
+            overflow-y: auto;
+            overflow-wrap: anywhere;
+            color: inherit;
             z-index: 100;
             line-height: 1.6;
         ">
             <strong>Tech Support</strong>
             <div>
             WhatsApp:
-            <a href="https://wa.me/6281388183368" target="_blank"
-               style="white-space: nowrap;">0813-8818-3368</a>
+            <a href="https://wa.me/6281388183368" target="_blank">0813-8818-3368</a>
             </div>
             <div>
             Email:
-            <a href="mailto:itfernandoo@gmail.com"
-               style="white-space: nowrap;">itfernandoo@gmail.com</a>
+            <a href="mailto:itfernandoo@gmail.com">itfernandoo@gmail.com</a>
             </div>
         </div>
         """,
